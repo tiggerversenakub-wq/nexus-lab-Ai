@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusLab AI — Advanced 2D/3D Multidisciplinary Science Lab</title>
+    <!-- Google Fonts: Prompt & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body, button, input, select, textarea {
+            font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-feature-settings: 'tnum' on, 'lnum' on;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(13, 20, 36, 0.84);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        /* Neon Text Effects */
+        .neon-text-cyan {
+            color: #67e8f9;
+            text-shadow: 0 0 7px rgba(6, 182, 212, 0.85), 0 0 18px rgba(6, 182, 212, 0.5), 0 0 30px rgba(6, 182, 212, 0.3);
+        }
+        .neon-text-blue {
+            color: #93c5fd;
+            text-shadow: 0 0 7px rgba(59, 130, 246, 0.85), 0 0 18px rgba(59, 130, 246, 0.5), 0 0 32px rgba(59, 130, 246, 0.3);
+        }
+        .neon-text-purple {
+            color: #d8b4fe;
+            text-shadow: 0 0 7px rgba(168, 85, 247, 0.85), 0 0 18px rgba(168, 85, 247, 0.5), 0 0 32px rgba(168, 85, 247, 0.3);
+        }
+        .neon-text-emerald {
+            color: #6ee7b7;
+            text-shadow: 0 0 7px rgba(16, 185, 129, 0.85), 0 0 18px rgba(16, 185, 129, 0.5), 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+        .neon-text-amber {
+            color: #fcd34d;
+            text-shadow: 0 0 7px rgba(245, 158, 11, 0.85), 0 0 18px rgba(245, 158, 11, 0.5), 0 0 30px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Neon Glow Box Borders */
+        .neon-box-blue {
+            border-color: rgba(59, 130, 246, 0.55) !important;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.25), inset 0 0 14px rgba(59, 130, 246, 0.12);
+        }
+        .neon-box-purple {
+            border-color: rgba(168, 85, 247, 0.55) !important;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.25), inset 0 0 14px rgba(168, 85, 247, 0.12);
+        }
+        .neon-box-emerald {
+            border-color: rgba(16, 185, 129, 0.55) !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.25), inset 0 0 14px rgba(16, 185, 129, 0.12);
+        }
+        .neon-box-amber {
+            border-color: rgba(245, 158, 11, 0.55) !important;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.25), inset 0 0 14px rgba(245, 158, 11, 0.12);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
+
+        /* Animations */
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.9)); opacity: 1; }
+            50% { filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.4)); opacity: 0.85; }
+        }
+        .animate-neon-pulse { animation: pulseGlow 2.5s infinite ease-in-out; }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-bubble { animation: slideUpFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Range Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none; appearance: none;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 9999px; height: 6px; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #ffffff; cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 14px currentColor;
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* Canvas */
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+        /* Smooth Buttons */
+        .btn-smooth { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-smooth:active { transform: scale(0.97); }
+
+        /* Microscope Reticle Overlay */
+        .microscope-mask {
+            border-radius: 50%;
+            box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.94), inset 0 0 30px rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-white">
+
+    <!-- TOP HEADER -->
+    <header class="bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 px-6 py-2.5 flex flex-wrap items-center justify-between gap-4 z-20 shrink-0">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25 ring-1 ring-white/20">
+                <i class="fa-solid fa-atom text-lg animate-spin" style="animation-duration: 20s;"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-bold text-base md:text-lg tracking-wide bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 bg-clip-text text-transparent neon-text-blue">
+                        NexusLab AI
+                    </h1>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-medium">v3.0 OMNI</span>
+                </div>
+                <p class="text-xs text-slate-400 font-normal">ห้องปฏิบัติการวิทยาศาสตร์จำลอง 2D/3D อัจฉริยะ (เคมี, ชีววิทยา, ฟิสิกส์, ดาราศาสตร์)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border border-slate-800/80 px-3 py-1 rounded-xl font-mono text-[11px] text-slate-300">
+                <i class="fa-solid fa-gauge-high text-cyan-400"></i>
+                <span id="fps-counter" class="text-cyan-300 font-semibold">60 FPS</span>
+            </div>
+
+            <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-xl shadow-inner">
+                <div class="w-2 h-2 rounded-full bg-emerald-400 animate-neon-pulse"></div>
+                <span class="text-xs font-semibold text-emerald-400 neon-text-emerald">NexusLab Core Active</span>
+            </div>
+
+            <button onclick="openApiKeyModal()" title="ตั้งค่า Gemini API Key" class="btn-smooth bg-slate-900 hover:bg-slate-800 border border-slate-700/80 px-2.5 py-1 rounded-xl text-xs text-slate-300 hover:text-white flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-key text-amber-400"></i>
+                <span class="hidden md:inline">API Key</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN INTERACTIVE LAYOUT -->
+    <main class="flex-1 relative overflow-hidden flex flex-col lg:flex-row gap-3 p-3">
+        
+        <!-- LEFT CONTROL & INSPECTION PANEL -->
+        <section class="w-full lg:w-[390px] flex flex-col gap-3 shrink-0 z-10 overflow-y-auto custom-scrollbar">
+            
+            <!-- Subject Selector -->
+            <div class="glass-panel p-3.5 rounded-2xl space-y-2.5 shadow-xl border border-slate-800/90">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-cyan-400"></i> เลือกสาขาห้องปฏิบัติการ
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono">4 Disciplines</span>
+                </h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="selectSubject('chemistry')" id="sub-chemistry" class="subject-btn btn-smooth border neon-box-blue bg-blue-500/15 text-blue-300 p-2 rounded-xl text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-flask text-sm text-blue-400"></i>
+                        <div class="text-left leading-tight">
+                            <span class="block">1. เคมี</span>
+                            <span class="text-[10px] font-normal opacity-75">ผสมสาร &amp; สสาร 3D</span>
+                        </div>
+                    </button>
+                    <button onclick="selectSubject('biology')" id="sub-biology" class="subject-btn btn-smooth border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 p-2 rounded-xl text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-dna text-sm text-emerald-400"></i>
+                        <div class="text-left leading-tight">
+                            <span class="block">2. ชีววิทยา</span>
+                            <span class="text-[10px] font-normal opacity-75">กล้องจุลทรรศน์ &amp; นิเวศ</span>
+                        </div>
+                    </button>
+                    <button onclick="selectSubject('physics')" id="sub-physics" class="subject-btn btn-smooth border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 p-2 rounded-xl text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-atom text-sm text-amber-400"></i>
+                        <div class="text-left leading-tight">
+                            <span class="block">3. ฟิสิกส์</span>
+                            <span class="text-[10px] font-normal opacity-75">กฎนิวตัน &amp; แรง 3D</span>
+                        </div>
+                    </button>
+                    <button onclick="selectSubject('astronomy')" id="sub-astronomy" class="subject-btn btn-smooth border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 p-2 rounded-xl text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-sm text-purple-400"></i>
+                        <div class="text-left leading-tight">
+                            <span class="block">4. ดาราศาสตร์</span>
+                            <span class="text-[10px] font-normal opacity-75">กลุ่มดาว &amp; เคปเลอร์</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Sub-Mode Selector Tabs -->
+                <div id="submode-tabs" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1 border-t border-slate-800/80">
+                    <!-- Populated dynamically based on subject -->
+                </div>
+            </div>
+
+            <!-- Dynamic Simulation Controls & Calculators -->
+            <div class="glass-panel p-3.5 rounded-2xl space-y-3 shadow-xl border border-slate-800/90">
+                <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                    <h3 id="control-panel-title" class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-cyan-400"></i> ควบคุมและคำนวณ
+                    </h3>
+                    <span id="sub-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30">CHEMISTRY</span>
+                </div>
+                <div id="sim-controls" class="space-y-3">
+                    <!-- Dynamic controls populated by JS -->
+                </div>
+            </div>
+
+            <!-- Scientific Observation & AI Evaluation -->
+            <div class="glass-panel p-3.5 rounded-2xl space-y-2.5 shadow-xl border border-slate-800/90">
+                <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center gap-2">
+                        <i class="fa-solid fa-microscope text-purple-400"></i> สรุปและประเมินผลการทดลอง
+                    </h3>
+                    <span id="ai-status-badge" class="text-[10px] bg-purple-500/20 text-purple-200 px-2 py-0.5 rounded-full border border-purple-500/40 neon-text-purple">พร้อมวิเคราะห์</span>
+                </div>
+                <div class="space-y-1">
+                    <h4 id="sim-ai-title" class="text-xs font-bold text-slate-100 neon-text-blue">การผสมสารและโครงสร้างสสาร</h4>
+                    <p id="sim-ai-desc" class="text-xs text-slate-400 leading-relaxed font-normal">ทดลองปรับตัวแปร สลับโหมด หรือคำนวณ แล้วกดปุ่มเพื่อให้ AI ประเมินผลทางทฤษฎี</p>
+                </div>
+                <button onclick="triggerSimAiAnalysis()" class="btn-smooth w-full py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 border border-indigo-400/30">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                    <span>ประเมินผลทางวิทยาศาสตร์ด้วย AI</span>
+                </button>
+            </div>
+
+        </section>
+
+        <!-- CENTER 3D / 2D SIMULATION VIEWPORT -->
+        <section class="flex-1 glass-panel rounded-2xl relative overflow-hidden flex flex-col shadow-2xl border border-slate-800/80">
+            
+            <!-- Floating Top HUD Controls -->
+            <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                <div class="bg-slate-950/85 backdrop-blur-md border border-slate-800/90 px-3 py-1.5 rounded-xl pointer-events-auto shadow-xl flex items-center gap-2.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
+                    <span id="sim-status-title" class="text-xs font-bold text-slate-100 neon-text-cyan">
+                        เคมี 3D: ผสมสารเคมี &amp; การเกิดปฏิกิริยาในบีกเกอร์
+                    </span>
+                </div>
+                
+                <div class="flex items-center gap-1.5 pointer-events-auto">
+                    <!-- Smooth Camera Preset Button -->
+                    <button onclick="cycleCameraView()" title="สลับมุมมองกล้อง" class="btn-smooth bg-slate-950/85 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/50 px-2.5 py-1.5 rounded-xl text-xs text-slate-200 font-medium shadow-lg flex items-center gap-1.5">
+                        <i class="fa-solid fa-video text-cyan-400"></i>
+                        <span id="cam-preset-text">มุมมองหลัก</span>
+                    </button>
+                    <!-- Wireframe Toggle Button -->
+                    <button onclick="toggleWireframeMode()" id="wireframe-btn" title="เปิด/ปิด โครงร่างตาข่าย 3D" class="btn-smooth bg-slate-950/85 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/50 px-2.5 py-1.5 rounded-xl text-xs text-slate-200 font-medium shadow-lg flex items-center gap-1.5">
+                        <i class="fa-solid fa-cube text-purple-400"></i>
+                        <span>โครงร่าง</span>
+                    </button>
+                    <!-- Reset View Button -->
+                    <button onclick="resetSceneOrientation()" title="รีเซ็ตมุมมอง" class="btn-smooth bg-slate-950/85 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 px-2 py-1.5 rounded-xl text-xs text-slate-300 font-medium shadow-lg">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Container for Three.js -->
+            <div id="canvas-container" class="w-full h-full flex-1 cursor-grab active:cursor-grabbing relative overflow-hidden">
+                <!-- Virtual Microscope Circular Mask Overlay (active in biology microscope mode) -->
+                <div id="microscope-overlay" class="absolute inset-0 pointer-events-none hidden flex items-center justify-center z-10 transition-opacity duration-300">
+                    <div class="relative w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] microscope-mask flex items-center justify-center">
+                        <!-- Crosshair & Micrometer Reticle -->
+                        <div class="absolute w-full h-[1px] bg-emerald-500/40"></div>
+                        <div class="absolute h-full w-[1px] bg-emerald-500/40"></div>
+                        <div class="absolute w-20 h-20 rounded-full border border-emerald-500/30"></div>
+                        <div class="absolute w-44 h-44 rounded-full border border-emerald-500/20"></div>
+                        <span class="absolute bottom-6 font-mono text-[10px] text-emerald-400/80 bg-slate-950/70 px-2 py-0.5 rounded">
+                            Field of View | Reticle 10µm/div
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Ecosystem 2D Population Dynamics Chart Overlay (active in biology ecosystem mode) -->
+                <div id="ecosystem-chart-container" class="absolute bottom-12 left-4 right-4 sm:right-auto sm:w-[380px] bg-slate-950/85 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 shadow-2xl z-10 hidden">
+                    <div class="flex items-center justify-between text-[11px] mb-1">
+                        <span class="font-bold text-emerald-300"><i class="fa-solid fa-chart-line mr-1"></i>กราฟพลวัตประชากร (Lotka-Volterra)</span>
+                        <div class="flex items-center gap-2 text-[10px]">
+                            <span class="text-emerald-400 font-semibold">• พืช</span>
+                            <span class="text-blue-400 font-semibold">• สัตว์กินพืช</span>
+                            <span class="text-rose-400 font-semibold">• ผู้ล่า</span>
+                        </div>
+                    </div>
+                    <canvas id="eco-chart-canvas" width="360" height="95" class="w-full h-24 rounded-lg bg-slate-900/80"></canvas>
+                </div>
+
+                <!-- Smooth Loading Indicator -->
+                <div id="canvas-loader" class="absolute inset-0 flex items-center justify-center bg-slate-950/90 z-0 transition-opacity duration-500 pointer-events-none">
+                    <div class="flex flex-col items-center gap-3">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-400"></i>
+                        <span class="text-xs text-slate-400 font-mono tracking-wider">กำลังโหลด 3D Physics Engine...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Bottom HUD Bar -->
+            <div class="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between text-[11px] text-slate-400 bg-slate-950/80 backdrop-blur-md px-4 py-1.5 rounded-xl border border-slate-800/80 pointer-events-none">
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-hand-pointer text-cyan-400"></i>
+                    <span id="canvas-hint">ลากเมาส์หมุนมุมมอง 3D (มีแรงเฉื่อย Damping) / เลื่อนสกอร์เพื่อซูม</span>
+                </span>
+                <div class="flex items-center gap-3">
+                    <span id="rotation-status" class="hidden sm:inline font-mono text-[10px] text-slate-500">Auto-Rotate: ON</span>
+                    <span class="font-mono text-cyan-400/80 text-[10px] neon-text-cyan">NexusLab Scientific Shader</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT DEDICATED AI CHAT ASSISTANT PANEL -->
+        <section class="w-full lg:w-[380px] flex flex-col glass-panel rounded-2xl p-3.5 shadow-xl shrink-0 z-10 overflow-hidden border border-slate-800/90">
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between border-b border-slate-800/90 pb-2.5 mb-2.5 shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 shadow-sm">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-100 neon-text-purple">AI Science Tutor Assistant</h3>
+                        <p class="text-[10px] text-slate-400">ติวเตอร์ AI ไขทุกข้อสงสัย 4 สาขาวิชา</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-[10px] text-emerald-300 font-semibold font-mono">Gemini AI</span>
+                </div>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-2 mb-2 text-[10px] shrink-0 text-slate-300">
+                <button onclick="useQuickPrompt('สารกำหนดปริมาณ (Limiting Reagent) คำนวณอย่างไร?')" class="btn-smooth whitespace-nowrap bg-slate-900/80 hover:bg-blue-600/20 border border-slate-800 hover:border-blue-500/40 px-2 py-1 rounded-lg">
+                    🧪 สารกำหนดปริมาณ
+                </button>
+                <button onclick="useQuickPrompt('อธิบายกฎ 3 ข้อของเคปเลอร์เกี่ยวกับวงโคจรดาวเคราะห์')" class="btn-smooth whitespace-nowrap bg-slate-900/80 hover:bg-purple-600/20 border border-slate-800 hover:border-purple-500/40 px-2 py-1 rounded-lg">
+                    🪐 กฎเคปเลอร์
+                </button>
+                <button onclick="useQuickPrompt('กฎข้อที่ 2 ของนิวตัน F=ma สัมพันธ์กับแรงเสียดทานอย่างไร?')" class="btn-smooth whitespace-nowrap bg-slate-900/80 hover:bg-amber-600/20 border border-slate-800 hover:border-amber-500/40 px-2 py-1 rounded-lg">
+                    ⚡ กฎนิวตัน &amp; แรง
+                </button>
+                <button onclick="useQuickPrompt('ห่วงโซ่อาหารและเสถียรภาพระบบนิเวศทำงานอย่างไร?')" class="btn-smooth whitespace-nowrap bg-slate-900/80 hover:bg-emerald-600/20 border border-slate-800 hover:border-emerald-500/40 px-2 py-1 rounded-lg">
+                    🌿 ระบบนิเวศ
+                </button>
+            </div>
+
+            <!-- Chat Message History Container -->
+            <div id="chat-history" class="flex-1 overflow-y-auto space-y-3 text-xs custom-scrollbar pr-1 mb-2.5">
+                <div class="chat-bubble bg-purple-500/10 border border-purple-500/25 rounded-2xl p-3 text-purple-100 shadow-sm leading-relaxed">
+                    <div class="font-bold text-[10px] text-purple-300 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                        <span class="neon-text-purple">Nexus AI Tutor:</span>
+                    </div>
+                    สวัสดีครับ! ยินดีต้อนรับสู่ <b class="neon-text-cyan">NexusLab AI</b> แพลตฟอร์มจำลองการทดลองวิทยาศาสตร์ระดับสูง:
+                    <ul class="mt-1.5 space-y-1 text-slate-300 list-disc list-inside">
+                        <li><b>เคมี:</b> ผสมสาร ปฏิกิริยา คำนวณปริมาณสารสัมพันธ์ และส่องโมเลกุล/ผลึก 3D</li>
+                        <li><b>ชีววิทยา:</b> กล้องจุลทรรศน์เสมือน และจำลองระบบนิเวศห่วงโซ่อาหาร</li>
+                        <li><b>ฟิสิกส์:</b> กฎการเคลื่อนที่ของนิวตัน แรง 3 มิติ และแรงสู่ศูนย์กลาง</li>
+                        <li><b>ดาราศาสตร์:</b> ทรงกลมกลุ่มดาว และกลศาสตร์อวกาศกฎเคปเลอร์</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="shrink-0 pt-2 border-t border-slate-800/80 flex gap-2">
+                <textarea id="ai-chat-input" rows="2" placeholder="พิมพ์ข้อความหรือคำถามวิทยาศาสตร์ (กด Enter เพื่อส่ง)..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendAiTutorMessage();}" class="flex-1 bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500/70 focus:ring-1 focus:ring-purple-500/50 resize-none custom-scrollbar transition-all"></textarea>
+                <button onclick="sendAiTutorMessage()" class="btn-smooth bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-4 rounded-xl text-xs font-semibold flex items-center justify-center shadow-lg shadow-purple-600/30 border border-purple-400/30">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- API KEY MODAL -->
+    <div id="apikey-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i> ตั้งค่า Google Gemini API Key
+                </h3>
+                <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                ระบุ Google Gemini API Key เพื่อเปิดใช้งานระบบติวเตอร์ AI อัจฉริยะแบบเต็มประสิทธิภาพ (หากเว้นว่างไว้ ระบบจะใช้ NexusLab Internal AI Simulator อัตโนมัติ)
+            </p>
+            <div>
+                <label class="text-[11px] font-mono text-slate-400 block mb-1">GEMINI_API_KEY</label>
+                <input type="password" id="custom-api-key-input" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-400">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeApiKeyModal()" class="btn-smooth px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white bg-slate-800">ยกเลิก</button>
+                <button onclick="saveCustomApiKey()" class="btn-smooth px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 shadow-md">บันทึก Key</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT & THREE.JS ENGINE -->
+    <script>
+        /* -------------------------------------------------------------
+           API & AI SERVICE LOGIC
+        ------------------------------------------------------------- */
+        let userApiKey = localStorage.getItem('nexuslab_gemini_api_key') || "";
+
+        function openApiKeyModal() {
+            document.getElementById('custom-api-key-input').value = userApiKey;
+            document.getElementById('apikey-modal').classList.remove('hidden');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apikey-modal').classList.add('hidden');
+        }
+
+        function saveCustomApiKey() {
+            userApiKey = document.getElementById('custom-api-key-input').value.trim();
+            localStorage.setItem('nexuslab_gemini_api_key', userApiKey);
+            closeApiKeyModal();
+            alert("บันทึก Gemini API Key เรียบร้อยแล้ว!");
+        }
+
+        async function fetchGeminiAPI(payload) {
+            const keyToUse = userApiKey || "";
+            if (!keyToUse) {
+                return generateLocalScientificAIResponse(payload);
+            }
+
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`;
+            const delays = [1000, 2000, 4000];
+            for (let i = 0; i <= delays.length; i++) {
+                try {
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) return await response.json();
+                } catch (err) {}
+                if (i < delays.length) await new Promise(r => setTimeout(r, delays[i]));
+            }
+            return generateLocalScientificAIResponse(payload);
+        }
+
+        function generateLocalScientificAIResponse(payload) {
+            const prompt = payload.contents?.[0]?.parts?.[0]?.text || "";
+            let reply = "";
+
+            if (prompt.includes("chemistry") || prompt.includes("เคมี")) {
+                reply = "ในการทดลองเคมี ปฏิกิริยาเคมีเกิดขึ้นจากการชนกันของอนุภาคที่มีพลังงานมากกว่าพลังงานกระตุ้น (Activation Energy) โดยการคำนวณปริมาณสารสัมพันธ์และการวิเคราะห์โครงสร้าง 3D ช่วยให้เข้าใจพันธะโควาเลนต์และโครงผลึกไอออนิกได้อย่างลึกซึ้ง";
+            } else if (prompt.includes("biology") || prompt.includes("ชีววิทยา")) {
+                reply = "การส่องตรวจกล้องจุลทรรศน์ช่วยเปิดเผยโครงสร้างเซลล์และออร์แกเนลล์สำคัญ ขณะที่แบบจำลองระบบนิเวศสะท้อนถึงการถ่ายทอดพลังงานและการรักษาสมดุลประชากรตามหลักพีระมิดพลังงานและโมเดล Lotka-Volterra";
+            } else if (prompt.includes("physics") || prompt.includes("ฟิสิกส์")) {
+                reply = "กฎการเคลื่อนที่ของนิวตันทั้ง 3 ข้อเป็นรากฐานของกลศาสตร์ดั้งเดิม: ΣF = 0 อธิบายความเฉื่อย, ΣF = ma อธิบายความสัมพันธ์ระหว่างแรงลัพธ์กับความเร่ง และ Action = Reaction แสดงถึงแรงคู่กิริยา-ปฏิกิริยาที่กระทำต่อคนละวัตถุ";
+            } else if (prompt.includes("astronomy") || prompt.includes("ดาราศาสตร์")) {
+                reply = "กฎทั้งสามข้อของเคปเลอร์ร่วมกับกฎแรงโน้มถ่วงสากลของนิวตันช่วยอธิบายวงโคจรทรงรีและการแปรผันของความเร็วตามระยะทาง ขณะที่การหมุนของทรงกลมท้องฟ้าสะท้อนถึงการหมุนรอบตัวเองของโลกในรอบ 24 ชั่วโมง";
+            } else {
+                reply = `จากหลักการทางวิทยาศาสตร์: ปรากฏการณ์นี้สอดคล้องกับกฎธรรมชาติและการอนุรักษ์พลังงาน สามารถทดลองปรับเปลี่ยนพารามิเตอร์ต่างๆ ในห้องแล็บเสมือนจริงเพื่อสังเกตผลกระทบเชิงพลวัตได้ทันที`;
+            }
+
+            return {
+                candidates: [{
+                    content: {
+                        parts: [{ text: reply }]
+                    }
+                }]
+            };
+        }
+
+        /* -------------------------------------------------------------
+           GLOBAL SIMULATION STATE & ARCHITECTURE
+        ------------------------------------------------------------- */
+        let currentSubject = 'chemistry';
+        let currentSubMode = 'chem_mix'; // Sub-modes per subject
+        let scene, camera, renderer, currentMeshGroup, starfieldGroup;
+        let isWireframe = false;
+        let clock;
+
+        // Smooth Physics & Damping Variables
+        let targetRotationX = 0, targetRotationY = 0;
+        let currentRotationX = 0, currentRotationY = 0;
+        let rotationVelocityX = 0, rotationVelocityY = 0;
+        let isDragging = false;
+        let previousPointerPosition = { x: 0, y: 0 };
+        let autoRotate = true;
+        let baseAnimationSpeed = 0.005;
+
+        // Camera Lerp Targets
+        let targetCameraZ = 14, targetCameraX = 0, targetCameraY = 1.2;
+        let cameraZoomStep = 0;
+
+        // FPS Monitoring
+        let frameCount = 0, lastFpsUpdate = 0;
+
+        // Specialized State Variables
+        // 1. Chemistry States
+        let chemReactionType = 'neutralization'; // neutralization, precipitation, gas, combustion
+        let chemVolA = 50, chemVolB = 50, chemTemp = 25;
+        let chemSelectedMatter = 'H2O'; // H2O, CO2, CH4, NaCl, states_solid, states_liquid, states_gas
+        let chemBeakerLiquidMesh, chemPrecipitateParticles, chemGasBubbles;
+
+        // 2. Biology States
+        let bioSpecimen = 'onion'; // onion, cheek, pond
+        let bioFocusCoarse = 50, bioFocusFine = 50;
+        let bioMagnification = 400;
+        let ecoProducers = 100, ecoPrey = 50, ecoPredators = 15;
+        let ecoHistory = { producers: [], prey: [], predators: [] };
+        let ecoTimer = null;
+
+        // 3. Physics States
+        let physMass = 10; // kg
+        let physAppliedForce = 40; // N
+        let physFrictionCoeff = 0.2;
+        let physInclineAngle = 0; // degrees
+        let physPositionX = -5, physVelocityX = 0;
+        let physBlockMesh, physFbdArrows = {};
+        let physCentripetalRadius = 4.5, physCentripetalSpeed = 20, physCentripetalAngle = 0;
+        let physOrbitalMesh, physFcArrow, physVelArrow;
+
+        // 4. Astronomy States
+        let astroEccentricity = 0.5; // Kepler ellipse eccentricity
+        let astroSemiMajorAxis = 6.0;
+        let astroOrbitalAngle = 0;
+        let astroTimeOfDay = 12.0; // 0.0 to 24.0 hours
+        let astroSelectedConstellation = 'all'; // all, orion, ursa, cas, cross
+        let astroPlanetMesh, astroOrbitLine, astroSweepSector;
+        let celestialSphereMesh, constellationGroup;
+
+        /* -------------------------------------------------------------
+           THREE.JS ENGINE INITIALIZATION
+        ------------------------------------------------------------- */
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            const loader = document.getElementById('canvas-loader');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020617);
+            scene.fog = new THREE.FogExp2(0x020617, 0.022);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 1.2, 14);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            container.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            // Lighting setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+            scene.add(ambientLight);
+
+            const pointLightCyan = new THREE.PointLight(0x06b6d4, 3.5, 70);
+            pointLightCyan.position.set(12, 16, 12);
+            scene.add(pointLightCyan);
+
+            const pointLightPurple = new THREE.PointLight(0xa855f7, 3.0, 70);
+            pointLightPurple.position.set(-14, -10, -10);
+            scene.add(pointLightPurple);
+
+            // Ethereal background starfield
+            createStarfield();
+
+            // Container for active subject meshes
+            currentMeshGroup = new THREE.Group();
+            scene.add(currentMeshGroup);
+
+            // Pointer event listeners (Damping & Inertia)
+            setupPointerInteractions(renderer.domElement);
+
+            window.addEventListener('resize', onWindowResize);
+
+            // Load initial subject & submode
+            selectSubject('chemistry');
+
+            // Hide loader smoothly
+            if (loader) {
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.remove(), 450);
+                }, 300);
+            }
+
+            animate();
+        }
+
+        function createStarfield() {
+            starfieldGroup = new THREE.Group();
+            const starGeo = new THREE.BufferGeometry();
+            const starCount = 750;
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+
+            for (let i = 0; i < starCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 180;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 180;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 180;
+
+                const c = Math.random();
+                if (c > 0.6) { colors[i * 3] = 0.4; colors[i * 3 + 1] = 0.8; colors[i * 3 + 2] = 1.0; }
+                else if (c > 0.3) { colors[i * 3] = 0.8; colors[i * 3 + 1] = 0.6; colors[i * 3 + 2] = 1.0; }
+                else { colors[i * 3] = 0.9; colors[i * 3 + 1] = 0.95; colors[i * 3 + 2] = 1.0; }
+            }
+
+            starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const starMat = new THREE.PointsMaterial({
+                size: 0.9,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.75,
+                fog: false
+            });
+
+            const stars = new THREE.Points(starGeo, starMat);
+            starfieldGroup.add(stars);
+            scene.add(starfieldGroup);
+        }
+
+        function setupPointerInteractions(canvasEl) {
+            canvasEl.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                autoRotate = false;
+                document.getElementById('rotation-status').innerText = "Manual Orbit Mode";
+                previousPointerPosition = { x: e.clientX, y: e.clientY };
+                rotationVelocityX = 0;
+                rotationVelocityY = 0;
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousPointerPosition.x;
+                const deltaY = e.clientY - previousPointerPosition.y;
+
+                rotationVelocityY = deltaX * 0.006;
+                rotationVelocityX = deltaY * 0.006;
+
+                targetRotationY += rotationVelocityY;
+                targetRotationX += rotationVelocityX;
+                targetRotationX = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, targetRotationX));
+
+                previousPointerPosition = { x: e.clientX, y: e.clientY };
+            });
+
+            const onPointerEnd = () => { isDragging = false; };
+            window.addEventListener('pointerup', onPointerEnd);
+            window.addEventListener('pointercancel', onPointerEnd);
+
+            canvasEl.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                targetCameraZ += e.deltaY * 0.012;
+                targetCameraZ = Math.max(3.5, Math.min(30.0, targetCameraZ));
+            }, { passive: false });
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !renderer || !camera) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        /* -------------------------------------------------------------
+           MAIN ANIMATION & RENDER LOOP
+        ------------------------------------------------------------- */
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            const elapsed = clock.getElapsedTime();
+
+            // FPS Counter
+            frameCount++;
+            if (elapsed - lastFpsUpdate > 0.5) {
+                const fps = Math.round(frameCount / (elapsed - lastFpsUpdate));
+                const fpsEl = document.getElementById('fps-counter');
+                if (fpsEl) fpsEl.innerText = `${fps} FPS`;
+                frameCount = 0;
+                lastFpsUpdate = elapsed;
+            }
+
+            // Smooth Camera Lerp
+            camera.position.z += (targetCameraZ - camera.position.z) * 0.09;
+            camera.position.x += (targetCameraX - camera.position.x) * 0.09;
+            camera.position.y += (targetCameraY - camera.position.y) * 0.09;
+
+            // Damping & Auto-Rotation
+            if (autoRotate && !isDragging) {
+                targetRotationY += baseAnimationSpeed;
+            } else if (!isDragging) {
+                targetRotationY += rotationVelocityY;
+                targetRotationX += rotationVelocityX;
+                rotationVelocityY *= 0.94;
+                rotationVelocityX *= 0.94;
+            }
+
+            currentRotationX += (targetRotationX - currentRotationX) * 0.085;
+            currentRotationY += (targetRotationY - currentRotationY) * 0.085;
+
+            if (currentMeshGroup) {
+                currentMeshGroup.rotation.x = currentRotationX;
+                currentMeshGroup.rotation.y = currentRotationY;
+            }
+
+            if (starfieldGroup) {
+                starfieldGroup.rotation.y += 0.0003;
+            }
+
+            // Real-time dynamic simulation updates per module
+            updateRealtimeSimulation(delta, elapsed);
+
+            renderer.render(scene, camera);
+        }
+
+        /* -------------------------------------------------------------
+           SUBJECT & SUB-MODE SWITCHING
+        ------------------------------------------------------------- */
+        function selectSubject(subject) {
+            currentSubject = subject;
+
+            // Reset buttons styling
+            document.querySelectorAll('.subject-btn').forEach(btn => {
+                btn.className = "subject-btn btn-smooth border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 p-2 rounded-xl text-xs font-semibold flex items-center gap-2";
+            });
+
+            const selectedBtn = document.getElementById(`sub-${subject}`);
+            const badge = document.getElementById('sub-badge');
+            const submodeContainer = document.getElementById('submode-tabs');
+
+            if (subject === 'chemistry') {
+                selectedBtn.className = "subject-btn btn-smooth border neon-box-blue bg-blue-500/15 text-blue-300 p-2 rounded-xl text-xs font-semibold flex items-center gap-2";
+                badge.className = "text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 neon-text-blue";
+                badge.innerText = "CHEMISTRY";
+                currentSubMode = 'chem_mix';
+
+                submodeContainer.innerHTML = `
+                    <button onclick="switchSubMode('chem_mix')" id="sm-chem_mix" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                        <i class="fa-solid fa-flask-vial mr-1"></i> ผสมสารเคมี
+                    </button>
+                    <button onclick="switchSubMode('chem_stoich')" id="sm-chem_stoich" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200">
+                        <i class="fa-solid fa-calculator mr-1"></i> คำนวณปริมาณสาร
+                    </button>
+                    <button onclick="switchSubMode('chem_matter')" id="sm-chem_matter" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200 col-span-2 sm:col-span-1">
+                        <i class="fa-solid fa-cubes mr-1"></i> สสาร 3D
+                    </button>
+                `;
+            } else if (subject === 'biology') {
+                selectedBtn.className = "subject-btn btn-smooth border neon-box-emerald bg-emerald-500/15 text-emerald-300 p-2 rounded-xl text-xs font-semibold flex items-center gap-2";
+                badge.className = "text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 neon-text-emerald";
+                badge.innerText = "BIOLOGY";
+                currentSubMode = 'bio_micro';
+
+                submodeContainer.innerHTML = `
+                    <button onclick="switchSubMode('bio_micro')" id="sm-bio_micro" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        <i class="fa-solid fa-microscope mr-1"></i> กล้องจุลทรรศน์
+                    </button>
+                    <button onclick="switchSubMode('bio_eco')" id="sm-bio_eco" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200">
+                        <i class="fa-solid fa-tree mr-1"></i> จำลองระบบนิเวศ
+                    </button>
+                `;
+            } else if (subject === 'physics') {
+                selectedBtn.className = "subject-btn btn-smooth border neon-box-amber bg-amber-500/15 text-amber-300 p-2 rounded-xl text-xs font-semibold flex items-center gap-2";
+                badge.className = "text-[10px] font-mono px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 neon-text-amber";
+                badge.innerText = "PHYSICS";
+                currentSubMode = 'phys_newton';
+
+                submodeContainer.innerHTML = `
+                    <button onclick="switchSubMode('phys_newton')" id="sm-phys_newton" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        <i class="fa-solid fa-arrows-to-dot mr-1"></i> กฎนิวตัน &amp; แรง 3D
+                    </button>
+                    <button onclick="switchSubMode('phys_circular')" id="sm-phys_circular" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200">
+                        <i class="fa-solid fa-circle-notch mr-1"></i> การเคลื่อนที่วงกลม
+                    </button>
+                `;
+            } else if (subject === 'astronomy') {
+                selectedBtn.className = "subject-btn btn-smooth border neon-box-purple bg-purple-500/15 text-purple-300 p-2 rounded-xl text-xs font-semibold flex items-center gap-2";
+                badge.className = "text-[10px] font-mono px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 neon-text-purple";
+                badge.innerText = "ASTRONOMY";
+                currentSubMode = 'astro_kepler';
+
+                submodeContainer.innerHTML = `
+                    <button onclick="switchSubMode('astro_kepler')" id="sm-astro_kepler" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                        <i class="fa-solid fa-satellite mr-1"></i> กลศาสตร์อวกาศ &amp; เคปเลอร์
+                    </button>
+                    <button onclick="switchSubMode('astro_constellation')" id="sm-astro_constellation" class="submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200">
+                        <i class="fa-solid fa-star mr-1"></i> การเคลื่อนที่กลุ่มดาว
+                    </button>
+                `;
+            }
+
+            switchSubMode(currentSubMode);
+        }
+
+        function switchSubMode(mode) {
+            currentSubMode = mode;
+
+            // Highlight submode button
+            document.querySelectorAll('.submode-btn').forEach(btn => {
+                btn.className = "submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200";
+            });
+            const activeBtn = document.getElementById(`sm-${mode}`);
+            if (activeBtn) {
+                if (currentSubject === 'chemistry') activeBtn.className = "submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40 neon-box-blue";
+                else if (currentSubject === 'biology') activeBtn.className = "submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 neon-box-emerald";
+                else if (currentSubject === 'physics') activeBtn.className = "submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 neon-box-amber";
+                else if (currentSubject === 'astronomy') activeBtn.className = "submode-btn btn-smooth px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40 neon-box-purple";
+            }
+
+            // Toggle Overlays
+            const microOverlay = document.getElementById('microscope-overlay');
+            const ecoOverlay = document.getElementById('ecosystem-chart-container');
+            if (microOverlay) microOverlay.classList.toggle('hidden', mode !== 'bio_micro');
+            if (ecoOverlay) ecoOverlay.classList.toggle('hidden', mode !== 'bio_eco');
+
+            // Reset camera smoothly
+            targetCameraX = 0;
+            targetCameraY = 1.2;
+            targetCameraZ = 14;
+
+            // Clean 3D Mesh Group
+            clearCurrentMeshGroup();
+
+            // Build Sub-Mode Specific Scene & Controls
+            if (mode === 'chem_mix') buildChemistryMixingScene();
+            else if (mode === 'chem_stoich') buildChemistryStoichiometryScene();
+            else if (mode === 'chem_matter') buildChemistryMatterScene();
+            else if (mode === 'bio_micro') buildBiologyMicroscopeScene();
+            else if (mode === 'bio_eco') buildBiologyEcosystemScene();
+            else if (mode === 'phys_newton') buildPhysicsNewtonScene();
+            else if (mode === 'phys_circular') buildPhysicsCircularScene();
+            else if (mode === 'astro_kepler') buildAstronomyKeplerScene();
+            else if (mode === 'astro_constellation') buildAstronomyConstellationScene();
+        }
+
+        function clearCurrentMeshGroup() {
+            if (ecoTimer) { clearInterval(ecoTimer); ecoTimer = null; }
+            while (currentMeshGroup.children.length > 0) {
+                const obj = currentMeshGroup.children[0];
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) {
+                    if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+                    else obj.material.dispose();
+                }
+                currentMeshGroup.remove(obj);
+            }
+        }
+
+        /* -------------------------------------------------------------
+           1. CHEMISTRY MODULE: MIXING, STOICHIOMETRY, 3D MATTER
+        ------------------------------------------------------------- */
+        function buildChemistryMixingScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-blue">เคมี: ผสมสารเคมี &amp; การเกิดปฏิกิริยาในบีกเกอร์ 3D</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-flask-vial text-blue-400"></i> ห้องผสมสารเคมี`;
+            document.getElementById('sim-ai-title').innerText = "ปฏิกิริยาเคมีและการเปลี่ยนแปลงพลังงาน";
+            document.getElementById('sim-ai-desc').innerText = "เลือกประเภทปฏิกิริยา ปรับอุณหภูมิ และปริมาตรสารเพื่อสังเกตการเกิดตะกอน แก๊ส หรือความร้อน";
+
+            // 3D Glass Beaker
+            const beakerGeo = new THREE.CylinderGeometry(2.4, 2.2, 5.0, 32, 1, true);
+            const beakerMat = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.35,
+                roughness: 0.1,
+                transmission: 0.9,
+                thickness: 0.5,
+                wireframe: isWireframe
+            });
+            const beaker = new THREE.Mesh(beakerGeo, beakerMat);
+            currentMeshGroup.add(beaker);
+
+            // Beaker base disk
+            const baseGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.1, 32);
+            const baseMesh = new THREE.Mesh(baseGeo, beakerMat);
+            baseMesh.position.y = -2.5;
+            currentMeshGroup.add(baseMesh);
+
+            // Liquid Volume inside Beaker
+            const liquidGeo = new THREE.CylinderGeometry(2.15, 2.1, 3.2, 32);
+            const liquidMat = new THREE.MeshStandardMaterial({
+                color: 0x38bdf8,
+                roughness: 0.2,
+                transparent: true,
+                opacity: 0.82
+            });
+            chemBeakerLiquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
+            chemBeakerLiquidMesh.position.y = -0.9;
+            currentMeshGroup.add(chemBeakerLiquidMesh);
+
+            // Floating Magnetic Stirrer bar
+            const stirrerGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.2, 16);
+            const stirrerMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+            const stirrer = new THREE.Mesh(stirrerGeo, stirrerMat);
+            stirrer.name = 'stirrerBar';
+            stirrer.rotation.z = Math.PI / 2;
+            stirrer.position.y = -2.4;
+            currentMeshGroup.add(stirrer);
+
+            // Render Controls UI
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">เลือกประเภทปฏิกิริยาเคมี</label>
+                        <select id="chem-rxn-select" onchange="chemReactionType=this.value; updateReactionVisual();" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-blue-500 font-medium">
+                            <option value="neutralization">1. สะเทินกรด-เบส: HCl (0.5M) + NaOH (0.5M) → NaCl + H₂O</option>
+                            <option value="precipitation">2. เกิดตะกอน: AgNO₃ + NaCl → AgCl↓ (ขาวขุ่น) + NaNO₃</option>
+                            <option value="gas">3. เกิดฟองแก๊ส: Zn(s) + 2HCl → ZnCl₂ + H₂↑</option>
+                            <option value="combustion">4. เผาไหม้คายความร้อน: CH₄ + 2O₂ → CO₂ + 2H₂O (Exothermic)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-slate-400">สาร A (ml)</span>
+                                <span id="vol-a-label" class="text-blue-400 font-mono font-bold">50</span>
+                            </div>
+                            <input type="range" min="10" max="150" value="50" oninput="chemVolA=parseFloat(this.value); document.getElementById('vol-a-label').innerText=this.value;" class="w-full accent-blue-500 cursor-pointer">
+                        </div>
+                        <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-slate-400">สาร B (ml)</span>
+                                <span id="vol-b-label" class="text-indigo-400 font-mono font-bold">50</span>
+                            </div>
+                            <input type="range" min="10" max="150" value="50" oninput="chemVolB=parseFloat(this.value); document.getElementById('vol-b-label').innerText=this.value;" class="w-full accent-indigo-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-slate-400">อุณหภูมิเริ่มต้น (°C)</span>
+                            <span id="chem-temp-label" class="text-amber-400 font-mono font-bold">25</span>
+                        </div>
+                        <input type="range" min="10" max="95" value="25" oninput="chemTemp=parseFloat(this.value); document.getElementById('chem-temp-label').innerText=this.value;" class="w-full accent-amber-500 cursor-pointer">
+                    </div>
+
+                    <button onclick="executeChemicalReaction()" class="btn-smooth w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-semibold shadow-md shadow-blue-600/25 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-flask-gear"></i>
+                        <span>ผสมสารและประมวลผลปฏิกิริยา</span>
+                    </button>
+
+                    <div id="chem-result-card" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        สถานะบีกเกอร์: พร้อมใส่สารและเริ่มทำปฏิกิริยาเคมี
+                    </div>
+                </div>
+            `;
+            updateReactionVisual();
+        }
+
+        function updateReactionVisual() {
+            if (!chemBeakerLiquidMesh) return;
+            if (chemReactionType === 'neutralization') {
+                chemBeakerLiquidMesh.material.color.setHex(0x38bdf8); // Sky blue
+                chemBeakerLiquidMesh.material.opacity = 0.85;
+            } else if (chemReactionType === 'precipitation') {
+                chemBeakerLiquidMesh.material.color.setHex(0xe2e8f0); // Milky white cloudy
+                chemBeakerLiquidMesh.material.opacity = 0.95;
+            } else if (chemReactionType === 'gas') {
+                chemBeakerLiquidMesh.material.color.setHex(0xa7f3d0); // Light emerald green
+                chemBeakerLiquidMesh.material.opacity = 0.75;
+            } else if (chemReactionType === 'combustion') {
+                chemBeakerLiquidMesh.material.color.setHex(0xf97316); // Glowing amber
+                chemBeakerLiquidMesh.material.opacity = 0.88;
+            }
+        }
+
+        function executeChemicalReaction() {
+            const totalVol = chemVolA + chemVolB;
+            const res = document.getElementById('chem-result-card');
+
+            if (chemReactionType === 'neutralization') {
+                const moles = (Math.min(chemVolA, chemVolB) * 0.5) / 1000;
+                const tempRise = (moles * 57.3 * 1000) / (totalVol * 4.184); // Delta H = -57.3 kJ/mol
+                const finalTemp = (chemTemp + tempRise).toFixed(1);
+                const finalPH = chemVolA === chemVolB ? "7.00 (สมดุลกลาง)" : (chemVolA > chemVolB ? `< 7.00 (กรดเหลือ)` : `> 7.00 (เบสเหลือ)`);
+
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ ผลปฏิกิริยาสะเทินกรด-เบส (Neutralization):</div>
+                    <div>• สมการ: HCl + NaOH → NaCl + H₂O + ความร้อน</div>
+                    <div>• ปริมาตรรวม: <b class="text-white">${totalVol} mL</b> | โมลสะเทิน: <b class="text-cyan-400">${moles.toFixed(4)} mol</b></div>
+                    <div>• อุณหภูมิพุ่งสูงขึ้น: <b class="text-amber-400">${finalTemp} °C</b> (+${tempRise.toFixed(1)}°C)</div>
+                    <div>• ค่า pH สารละลายลัพธ์: <b class="text-emerald-400">${finalPH}</b></div>
+                `;
+            } else if (chemReactionType === 'precipitation') {
+                const molesAgCl = (Math.min(chemVolA, chemVolB) * 0.2) / 1000;
+                const massPpt = (molesAgCl * 143.32).toFixed(3); // Mw AgCl = 143.32 g/mol
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ ผลปฏิกิริยาตกตะกอน (Precipitation):</div>
+                    <div>• สมการ: AgNO₃(aq) + NaCl(aq) → AgCl(s)↓ + NaNO₃(aq)</div>
+                    <div>• ตะกอนสีขาวขุ่น: <b class="text-white">ซิลเวอร์คลอไรด์ (AgCl)</b></div>
+                    <div>• ปริมาณตะกอนที่เกิดขึ้น: <b class="text-cyan-400">${massPpt} กรัม</b> (${molesAgCl.toFixed(4)} mol)</div>
+                    <div>• สารละลายส่วนใสเหนือตะกอนคือ โซเดียมไนเตรต (NaNO₃)</div>
+                `;
+            } else if (chemReactionType === 'gas') {
+                const molesH2 = (chemVolA * 0.5) / 2000;
+                const volH2L = (molesH2 * 22.4).toFixed(3);
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ ผลปฏิกิริยาเกิดแก๊ส (Gas Evolution):</div>
+                    <div>• สมการ: Zn(s) + 2HCl(aq) → ZnCl₂(aq) + H₂(g)↑</div>
+                    <div>• เกิดฟองฟู่รวดเร็ว: <b class="text-emerald-300">แก๊สไฮโดรเจน (H₂)</b></div>
+                    <div>• ปริมาตรแก๊สที่ STP: <b class="text-cyan-400">${volH2L} ลิตร</b> (${molesH2.toFixed(4)} mol)</div>
+                    <div>• สังกะสีค่อยๆ ละลายกลายเป็น ซิงค์คลอไรด์ในสารละลาย</div>
+                `;
+            } else {
+                res.innerHTML = `
+                    <div class="text-amber-300 font-bold mb-1">✓ ผลปฏิกิริยาเผาไหม้ (Combustion):</div>
+                    <div>• สมการ: CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(l) + 891 kJ</div>
+                    <div>• พลังงานความร้อนคายออกสูง: <b class="text-amber-400">ΔH = -891 kJ/mol</b></div>
+                    <div>• เป็นปฏิกิริยาคายความร้อนสมบูรณ์ ได้แก๊ส CO₂ และไอน้ำ</div>
+                `;
+            }
+        }
+
+        function buildChemistryStoichiometryScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-blue">เคมี: เครื่องมือคำนวณปริมาณสารสัมพันธ์ &amp; สารละลาย</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-calculator text-blue-400"></i> คำนวณปริมาณสาร (Stoichiometry)`;
+            document.getElementById('sim-ai-title').innerText = "การคำนวณโมล สารละลาย และสารกำหนดปริมาณ";
+            document.getElementById('sim-ai-desc').innerText = "คำนวณความเข้มข้นโมลาร์ ปริมาณสารกำหนดปริมาณ และคำนวณ pH ของสารละลาย";
+
+            // Visual Stoichiometric Balance Scales 3D
+            const pillarGeo = new THREE.CylinderGeometry(0.2, 0.4, 6.0, 16);
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6, roughness: 0.3 });
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            currentMeshGroup.add(pillar);
+
+            const beamGeo = new THREE.BoxGeometry(7.0, 0.25, 0.4);
+            const beam = new THREE.Mesh(beamGeo, pillarMat);
+            beam.position.y = 2.8;
+            currentMeshGroup.add(beam);
+
+            // Left Pan (Reactants)
+            const panGeo = new THREE.CylinderGeometry(1.6, 1.4, 0.3, 32);
+            const panMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.4, roughness: 0.3 });
+            const panLeft = new THREE.Mesh(panGeo, panMat);
+            panLeft.position.set(-3.2, 1.2, 0);
+            currentMeshGroup.add(panLeft);
+
+            // Right Pan (Products)
+            const panRight = new THREE.Mesh(panGeo, panMat);
+            panRight.position.set(3.2, 1.2, 0);
+            currentMeshGroup.add(panRight);
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">สูตรคำนวณที่ต้องการ</label>
+                        <select id="stoich-mode" onchange="updateStoichModeUI(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-blue-500 font-medium">
+                            <option value="moles">1. โมลจากมวล: n = g / Mw</option>
+                            <option value="solution">2. การเจือจางสารละลาย: M₁V₁ = M₂V₂</option>
+                            <option value="limiting">3. สารกำหนดปริมาณ (Limiting Reagent)</option>
+                            <option value="ph">4. คำนวณกรด-เบส &amp; pH: pH = -log[H⁺]</option>
+                        </select>
+                    </div>
+
+                    <div id="stoich-input-container" class="space-y-2.5">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <button onclick="calculateStoichiometry()" class="btn-smooth w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white rounded-xl font-semibold shadow-md shadow-blue-600/25 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span>คำนวณผลลัพธ์</span>
+                    </button>
+
+                    <div id="stoich-result-box" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        กรอกข้อมูลแล้วกดปุ่มคำนวณ...
+                    </div>
+                </div>
+            `;
+            updateStoichModeUI('moles');
+        }
+
+        function updateStoichModeUI(mode) {
+            const container = document.getElementById('stoich-input-container');
+            if (mode === 'moles') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-slate-400 block mb-1">มวลสาร (กรัม - g)</label>
+                            <input type="number" id="in-mass" value="18" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">มวลโมเลกุล (Mw)</label>
+                            <input type="number" id="in-mw" value="18.015" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                        </div>
+                    </div>
+                `;
+            } else if (mode === 'solution') {
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-slate-400 block mb-1">ความเข้มข้นต้น M₁ (mol/L)</label>
+                            <input type="number" id="in-m1" value="2.0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">ปริมาตรต้น V₁ (mL)</label>
+                            <input type="number" id="in-v1" value="25" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">ปริมาตรสารละลายใหม่ V₂ (mL)</label>
+                        <input type="number" id="in-v2" value="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                    </div>
+                `;
+            } else if (mode === 'limiting') {
+                container.innerHTML = `
+                    <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800 text-[10px] text-slate-400 mb-2">
+                        สมการทดสอบ: 2H₂ + O₂ → 2H₂O
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-slate-400 block mb-1">โมลของ H₂ (mol)</label>
+                            <input type="number" id="in-mol-a" value="4.0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">โมลของ O₂ (mol)</label>
+                            <input type="number" id="in-mol-b" value="1.5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div>
+                        <label class="text-slate-400 block mb-1">ความเข้มข้นไอออน [H⁺] หรือ [OH⁻] (M)</label>
+                        <input type="text" id="in-h-conc" value="0.001" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
+                    </div>
+                `;
+            }
+        }
+
+        function calculateStoichiometry() {
+            const mode = document.getElementById('stoich-mode').value;
+            const res = document.getElementById('stoich-result-box');
+
+            if (mode === 'moles') {
+                const g = parseFloat(document.getElementById('in-mass').value);
+                const mw = parseFloat(document.getElementById('in-mw').value);
+                const n = g / mw;
+                const molecules = (n * 6.022e23).toExponential(3);
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ ผลการคำนวณโมล (Mole Calculation):</div>
+                    <div>• จำนวนโมล (n): <b class="text-cyan-400">${n.toFixed(4)} mol</b></div>
+                    <div>• จำนวนอนุภาค: <b class="text-white">${molecules} โมเลกุล</b> (คูณเลขอโวกาโดร)</div>
+                `;
+            } else if (mode === 'solution') {
+                const m1 = parseFloat(document.getElementById('in-m1').value);
+                const v1 = parseFloat(document.getElementById('in-v1').value);
+                const v2 = parseFloat(document.getElementById('in-v2').value);
+                const m2 = (m1 * v1) / v2;
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ ผลการเจือจางสารละลาย (M₁V₁ = M₂V₂):</div>
+                    <div>• ความเข้มข้นสารละลายใหม่ (M₂): <b class="text-cyan-400">${m2.toFixed(4)} M (mol/L)</b></div>
+                    <div>• อัตราส่วนการเจือจาง: 1 : ${(v2 / v1).toFixed(1)} เท่า</div>
+                `;
+            } else if (mode === 'limiting') {
+                const h2 = parseFloat(document.getElementById('in-mol-a').value);
+                const o2 = parseFloat(document.getElementById('in-mol-b').value);
+                // 2 H2 + 1 O2 -> 2 H2O
+                const h2Yield = h2 / 2;
+                const o2Yield = o2 / 1;
+                let limiting = "", excess = "", h2oProd = 0;
+
+                if (h2Yield < o2Yield) {
+                    limiting = "H₂ (ไฮโดรเจน)";
+                    excess = `O₂ เหลือ ${(o2 - h2 / 2).toFixed(2)} mol`;
+                    h2oProd = h2;
+                } else {
+                    limiting = "O₂ (ออกซิเจน)";
+                    excess = `H₂ เหลือ ${(h2 - o2 * 2).toFixed(2)} mol`;
+                    h2oProd = o2 * 2;
+                }
+
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ สรุปสารกำหนดปริมาณ (Limiting Reagent):</div>
+                    <div>• สารกำหนดปริมาณคือ: <b class="text-rose-400">${limiting}</b></div>
+                    <div>• เกิดผลผลิตน้ำ (H₂O): <b class="text-emerald-400">${h2oProd.toFixed(2)} mol</b></div>
+                    <div>• สารที่มีปริมาณมากเกินพอ: <b class="text-white">${excess}</b></div>
+                `;
+            } else {
+                const h = parseFloat(document.getElementById('in-h-conc').value);
+                const ph = -Math.log10(h);
+                const poh = 14 - ph;
+                res.innerHTML = `
+                    <div class="text-blue-300 font-bold mb-1">✓ ผลคำนวณกรด-เบส &amp; pH:</div>
+                    <div>• ค่า pH: <b class="text-cyan-400 font-bold">${ph.toFixed(2)}</b> (${ph < 7 ? 'สภาพกรด Acidic' : ph > 7 ? 'สภาพเบส Basic' : 'เป็นกลาง Neutral'})</div>
+                    <div>• ค่า pOH: <b class="text-white">${poh.toFixed(2)}</b> | [OH⁻] = ${(10 ** -poh).toExponential(2)} M</div>
+                `;
+            }
+        }
+
+        function buildChemistryMatterScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-blue">เคมี: ส่องโครงสร้างโมเลกุล &amp; โครงผลึกสสาร 3 มิติ</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-cubes text-blue-400"></i> ส่องสสาร 3 มิติ (Matter Inspector)`;
+            document.getElementById('sim-ai-title').innerText = "การจัดเรียงอะตอม พันธะ และสถานะของสสาร";
+            document.getElementById('sim-ai-desc').innerText = "ส่องดูโครงสร้างโมเลกุล H₂O, CO₂, CH₄, ผลึก NaCl หรือจำลองสถานะของแข็ง ของเหลว แก๊ส";
+
+            renderSelectedMatter3D();
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">เลือกโมเลกุลหรือผลึกสสาร</label>
+                        <select id="matter-select" onchange="chemSelectedMatter=this.value; renderSelectedMatter3D();" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-blue-500 font-medium">
+                            <option value="H2O">1. โมเลกุลน้ำ (H₂O) — มุมงอ 104.5° พันธะโควาเลนต์</option>
+                            <option value="CO2">2. คาร์บอนไดออกไซด์ (CO₂) — เส้นตรง 180° พันธะคู่</option>
+                            <option value="CH4">3. มีเทน (CH₄) — ทรงสี่หน้า (Tetrahedral 109.5°)</option>
+                            <option value="NaCl">4. ผลึกเกลือแกง (NaCl Lattice) — โครงสร้างไอออนิกลูกบาศก์</option>
+                            <option value="states_solid">5. สถานะของแข็ง (Solid) — อนุภาคสั่นสะเทือนคงรูป</option>
+                            <option value="states_liquid">6. สถานะของเหลว (Liquid) — อนุภาคเลื่อนไหลเปลี่ยนรูป</option>
+                            <option value="states_gas">7. สถานะแก๊ส (Gas) — อนุภาคกระจายตัวอิสระความเร็วสูง</option>
+                        </select>
+                    </div>
+
+                    <div id="matter-info-card" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        <!-- Populated by renderSelectedMatter3D -->
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSelectedMatter3D() {
+            clearCurrentMeshGroup();
+
+            const info = document.getElementById('matter-info-card');
+            const matter = chemSelectedMatter;
+
+            if (matter === 'H2O') {
+                // Oxygen Atom (Red)
+                const oGeo = new THREE.SphereGeometry(1.3, 32, 32);
+                const oMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.2, wireframe: isWireframe });
+                const oMesh = new THREE.Mesh(oGeo, oMat);
+                currentMeshGroup.add(oMesh);
+
+                // Two Hydrogen Atoms (White)
+                const hGeo = new THREE.SphereGeometry(0.75, 24, 24);
+                const hMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3, wireframe: isWireframe });
+
+                const h1 = new THREE.Mesh(hGeo, hMat);
+                h1.position.set(1.65, 1.15, 0);
+                currentMeshGroup.add(h1);
+
+                const h2 = new THREE.Mesh(hGeo, hMat);
+                h2.position.set(-1.65, 1.15, 0);
+                currentMeshGroup.add(h2);
+
+                const bMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 });
+                currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(0,0,0), new THREE.Vector3(1.65, 1.15, 0), 0.18, bMat));
+                currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(0,0,0), new THREE.Vector3(-1.65, 1.15, 0), 0.18, bMat));
+
+                if (info) {
+                    info.innerHTML = `
+                        <div class="text-blue-300 font-bold mb-1">โครงสร้างโมเลกุลน้ำ (H₂O):</div>
+                        <div>• รูปร่าง: มุมงอ (Bent Shape) มุมพันธะ 104.5°</div>
+                        <div>• พันธะ: Covalent Bond ระหว่าง O (sp³) กับ H (1s)</div>
+                        <div>• มีขั้วสูง (Polar Molecule) เกิดพันธะไฮโดรเจนได้</div>
+                    `;
+                }
+
+            } else if (matter === 'CO2') {
+                // Carbon (Dark Grey)
+                const cGeo = new THREE.SphereGeometry(1.2, 32, 32);
+                const cMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.2, wireframe: isWireframe });
+                currentMeshGroup.add(new THREE.Mesh(cGeo, cMat));
+
+                // Oxygen 1 & 2 (Red)
+                const oGeo = new THREE.SphereGeometry(1.0, 32, 32);
+                const oMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.2, wireframe: isWireframe });
+
+                const o1 = new THREE.Mesh(oGeo, oMat); o1.position.set(-2.4, 0, 0); currentMeshGroup.add(o1);
+                const o2 = new THREE.Mesh(oGeo, oMat); o2.position.set(2.4, 0, 0); currentMeshGroup.add(o2);
+
+                // Double Bonds
+                const bMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
+                currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(-2.4, 0.25, 0), new THREE.Vector3(0, 0.25, 0), 0.1, bMat));
+                currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(-2.4, -0.25, 0), new THREE.Vector3(0, -0.25, 0), 0.1, bMat));
+                currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(2.4, 0.25, 0), new THREE.Vector3(0, 0.25, 0), 0.1, bMat));
+                currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(2.4, -0.25, 0), new THREE.Vector3(0, -0.25, 0), 0.1, bMat));
+
+                if (info) {
+                    info.innerHTML = `
+                        <div class="text-blue-300 font-bold mb-1">คาร์บอนไดออกไซด์ (CO₂):</div>
+                        <div>• รูปร่าง: เส้นตรง (Linear) มุมพันธะ 180°</div>
+                        <div>• พันธะ: พันธะคู่ (Double Covalent Bonds) O=C=O</div>
+                        <div>• ไม่มีขั้ว (Non-polar Molecule) เพราะไดโพลโมเมนต์หักล้างกัน</div>
+                    `;
+                }
+
+            } else if (matter === 'CH4') {
+                // Carbon (Dark Grey)
+                const cGeo = new THREE.SphereGeometry(1.1, 32, 32);
+                const cMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.2, wireframe: isWireframe });
+                currentMeshGroup.add(new THREE.Mesh(cGeo, cMat));
+
+                const hPositions = [
+                    new THREE.Vector3(0, 1.8, 0),
+                    new THREE.Vector3(1.7, -0.6, 0),
+                    new THREE.Vector3(-0.85, -0.6, 1.47),
+                    new THREE.Vector3(-0.85, -0.6, -1.47)
+                ];
+
+                const hGeo = new THREE.SphereGeometry(0.65, 24, 24);
+                const hMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+                const bMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
+
+                hPositions.forEach(pos => {
+                    const h = new THREE.Mesh(hGeo, hMat);
+                    h.position.copy(pos);
+                    currentMeshGroup.add(h);
+                    currentMeshGroup.add(createCylinderMesh(new THREE.Vector3(0,0,0), pos, 0.14, bMat));
+                });
+
+                if (info) {
+                    info.innerHTML = `
+                        <div class="text-blue-300 font-bold mb-1">มีเทน (CH₄):</div>
+                        <div>• รูปร่าง: ทรงสี่หน้า (Tetrahedral) ไฮบริไดเซชัน sp³</div>
+                        <div>• มุมพันธะ: 109.5° ทุกทิศทางเท่ากันสมบูรณ์</div>
+                    `;
+                }
+
+            } else if (matter === 'NaCl') {
+                // Sodium Chloride 3x3x3 Ionic Crystal Lattice
+                const naMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.2 }); // Na+ Purple
+                const clMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.2 }); // Cl- Emerald
+
+                const naGeo = new THREE.SphereGeometry(0.42, 20, 20);
+                const clGeo = new THREE.SphereGeometry(0.65, 20, 20);
+
+                const spacing = 1.35;
+                for (let x = -1; x <= 1; x++) {
+                    for (let y = -1; y <= 1; y++) {
+                        for (let z = -1; z <= 1; z++) {
+                            const isNa = (Math.abs(x + y + z) % 2 === 0);
+                            const sphere = new THREE.Mesh(isNa ? naGeo : clGeo, isNa ? naMat : clMat);
+                            sphere.position.set(x * spacing, y * spacing, z * spacing);
+                            currentMeshGroup.add(sphere);
+                        }
+                    }
+                }
+
+                if (info) {
+                    info.innerHTML = `
+                        <div class="text-blue-300 font-bold mb-1">โครงผลึกเกลือแกง (NaCl Ionic Lattice):</div>
+                        <div>• ไอออน: <span class="text-purple-400">Na⁺ (สีม่วง)</span> และ <span class="text-emerald-400">Cl⁻ (สีเขียว)</span></div>
+                        <div>• การจัดเรียง: Face-Centered Cubic (FCC) อัตราส่วน 1:1</div>
+                        <div>• แรงยึดเหนี่ยว: พันธะไอออนิกที่มีจุดหลอมเหลวสูง 801 °C</div>
+                    `;
+                }
+
+            } else {
+                // States of Matter: Particles in a glass cube box
+                const count = matter === 'states_solid' ? 64 : matter === 'states_liquid' ? 50 : 35;
+                const pGeo = new THREE.SphereGeometry(0.28, 16, 16);
+                const pMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2 });
+
+                const particlesGroup = new THREE.Group();
+                particlesGroup.name = 'matterParticles';
+
+                for (let i = 0; i < count; i++) {
+                    const p = new THREE.Mesh(pGeo, pMat);
+                    if (matter === 'states_solid') {
+                        const dim = 4;
+                        const x = (i % dim) - 1.5;
+                        const y = (Math.floor(i / dim) % dim) - 1.5;
+                        const z = Math.floor(i / (dim * dim)) - 1.5;
+                        p.position.set(x * 0.9, y * 0.9, z * 0.9);
+                    } else if (matter === 'states_liquid') {
+                        p.position.set((Math.random() - 0.5) * 3.5, (Math.random() - 0.5) * 1.5 - 1.0, (Math.random() - 0.5) * 3.5);
+                    } else {
+                        p.position.set((Math.random() - 0.5) * 4.5, (Math.random() - 0.5) * 4.5, (Math.random() - 0.5) * 4.5);
+                    }
+                    particlesGroup.add(p);
+                }
+                currentMeshGroup.add(particlesGroup);
+
+                // Boundary wireframe box
+                const boxGeo = new THREE.BoxGeometry(5.0, 5.0, 5.0);
+                const boxMat = new THREE.MeshBasicMaterial({ color: 0x475569, wireframe: true });
+                currentMeshGroup.add(new THREE.Mesh(boxGeo, boxMat));
+
+                if (info) {
+                    const st = matter.replace('states_', '');
+                    info.innerHTML = `
+                        <div class="text-blue-300 font-bold mb-1">แบบจำลองสถานะ ${st.toUpperCase()}:</div>
+                        <div>• การเคลื่อนที่: ${st === 'solid' ? 'สั่นรอบตำแหน่งคงที่ ปริมาตรและรูปร่างแน่นอน' : st === 'liquid' ? 'อนุภาคเลื่อนไหลได้ ปริมาตรแน่นอน แต่รูปร่างตามภาชนะ' : 'อนุภาคกระจายตัวอิสระ เคลื่อนที่เร็ว ปริมาตรและรูปร่างไม่แน่นอน'}</div>
+                    `;
+                }
+            }
+        }
+
+        /* -------------------------------------------------------------
+           2. BIOLOGY MODULE: VIRTUAL MICROSCOPE & ECOSYSTEM
+        ------------------------------------------------------------- */
+        function buildBiologyMicroscopeScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-emerald">ชีววิทยา: กล้องจุลทรรศน์เสมือน &amp; ส่องตรวจตัวอย่างเซลล์</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-microscope text-emerald-400"></i> กล้องจุลทรรศน์เสมือน`;
+            document.getElementById('sim-ai-title').innerText = "ชีววิทยาของเซลล์และการส่องกล้อง";
+            document.getElementById('sim-ai-desc').innerText = "ปรับเลนส์ใกล้วัตถุ โฟกัสหยาบ/ละเอียด เพื่อสังเกตผนังเซลล์ คลอโรพลาสต์ หรือการเคลื่อนที่ของสิ่งมีชีวิต";
+
+            renderSpecimen3D();
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">เลือกตัวอย่างสไลด์ (Specimen)</label>
+                        <select id="bio-specimen-select" onchange="bioSpecimen=this.value; renderSpecimen3D();" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-medium">
+                            <option value="onion">1. เซลล์เยื่อหอม (Onion Epidermal Plant Cells)</option>
+                            <option value="cheek">2. เซลล์เยื่อบุข้างแก้ม (Human Cheek Epithelial Cells)</option>
+                            <option value="pond">3. สิ่งมีชีวิตในหยดน้ำ (Pond Water: Paramecium &amp; Euglena)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">กำลังขยายเลนส์ใกล้วัตถุ (Objective Lens)</label>
+                        <div class="grid grid-cols-4 gap-1.5 font-mono">
+                            <button onclick="setMicroscopeMagnification(40)" class="mag-btn btn-smooth py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300">4x</button>
+                            <button onclick="setMicroscopeMagnification(100)" class="mag-btn btn-smooth py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300">10x</button>
+                            <button onclick="setMicroscopeMagnification(400)" class="mag-btn btn-smooth py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 font-bold">40x</button>
+                            <button onclick="setMicroscopeMagnification(1000)" class="mag-btn btn-smooth py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300">100x</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-slate-400">ปุ่มปรับภาพหยาบ (Coarse Focus)</span>
+                                <span id="coarse-label" class="text-emerald-400 font-mono font-bold">50</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" oninput="bioFocusCoarse=parseFloat(this.value); updateMicroscopeFocus();" class="w-full accent-emerald-500 cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-slate-400">ปุ่มปรับภาพละเอียด (Fine Focus)</span>
+                                <span id="fine-label" class="text-emerald-400 font-mono font-bold">50</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" oninput="bioFocusFine=parseFloat(this.value); updateMicroscopeFocus();" class="w-full accent-emerald-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div id="bio-specimen-info" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        โฟกัสคมชัด 100% | กำลังขยายรวม 400x
+                    </div>
+                </div>
+            `;
+            updateMicroscopeFocus();
+        }
+
+        function setMicroscopeMagnification(mag) {
+            bioMagnification = mag;
+            document.querySelectorAll('.mag-btn').forEach(btn => {
+                btn.className = "mag-btn btn-smooth py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300";
+            });
+            event.target.className = "mag-btn btn-smooth py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 font-bold";
+
+            if (mag === 40) targetCameraZ = 16.0;
+            else if (mag === 100) targetCameraZ = 12.0;
+            else if (mag === 400) targetCameraZ = 8.0;
+            else targetCameraZ = 4.8;
+
+            updateMicroscopeFocus();
+        }
+
+        function updateMicroscopeFocus() {
+            document.getElementById('coarse-label').innerText = bioFocusCoarse;
+            document.getElementById('fine-label').innerText = bioFocusFine;
+
+            // Optical blur simulation based on focus distance
+            const coarseDiff = Math.abs(bioFocusCoarse - 50);
+            const fineDiff = Math.abs(bioFocusFine - 50);
+            const blurAmount = (coarseDiff * 0.15 + fineDiff * 0.05);
+
+            const canvas = document.querySelector('#canvas-container canvas');
+            if (canvas) {
+                canvas.style.filter = `blur(${blurAmount.toFixed(1)}px)`;
+            }
+
+            const info = document.getElementById('bio-specimen-info');
+            const sharpness = Math.max(0, 100 - blurAmount * 12).toFixed(0);
+            if (info) {
+                info.innerHTML = `
+                    <div class="text-emerald-300 font-bold mb-1">ความคมชัดภาพ: ${sharpness}% (${sharpness > 80 ? 'คมชัดระดับเลนส์' : 'ภาพเบลอ หลุดโฟกัส'})</div>
+                    <div>• เลนส์ใกล้ตา 10x × เลนส์ใกล้วัตถุ ${bioMagnification/10}x = <b class="text-white">${bioMagnification}x</b></div>
+                    <div>• ตัวอย่าง: ${bioSpecimen === 'onion' ? 'เซลล์พืชเรียงเป็นระเบียบคล้ายกำแพงอิฐ' : bioSpecimen === 'cheek' ? 'เซลล์สัตว์รูปร่างกลมรี เยื่อหุ้มเซลล์เด่นชัด' : 'จุลินทรีย์ว่ายน้ำด้วยการโบกพัดของ Cilia'}</div>
+                `;
+            }
+        }
+
+        function renderSpecimen3D() {
+            clearCurrentMeshGroup();
+
+            if (bioSpecimen === 'onion') {
+                // Plant Onion Cells (Tiled hexagonal/brick wall)
+                const cellW = 2.4, cellH = 1.3;
+                for (let x = -2; x <= 2; x++) {
+                    for (let y = -2; y <= 2; y++) {
+                        const cellGroup = new THREE.Group();
+                        // Cell Wall
+                        const wallGeo = new THREE.BoxGeometry(cellW * 0.94, cellH * 0.9, 0.3);
+                        const wallMat = new THREE.MeshStandardMaterial({
+                            color: 0x10b981,
+                            roughness: 0.4,
+                            transparent: true,
+                            opacity: 0.65,
+                            wireframe: isWireframe
+                        });
+                        cellGroup.add(new THREE.Mesh(wallGeo, wallMat));
+
+                        // Nucleus
+                        const nucGeo = new THREE.SphereGeometry(0.2, 16, 16);
+                        const nucMat = new THREE.MeshStandardMaterial({ color: 0xa855f7 });
+                        const nuc = new THREE.Mesh(nucGeo, nucMat);
+                        nuc.position.set((Math.random() - 0.5) * 0.8, (Math.random() - 0.5) * 0.4, 0.1);
+                        cellGroup.add(nuc);
+
+                        cellGroup.position.set(x * cellW, y * cellH, 0);
+                        currentMeshGroup.add(cellGroup);
+                    }
+                }
+            } else if (bioSpecimen === 'cheek') {
+                // Animal Cheek Cells (Irregular scattered round shapes)
+                for (let i = 0; i < 7; i++) {
+                    const cGeo = new THREE.IcosahedronGeometry(1.6 + Math.random() * 0.5, 2);
+                    const cMat = new THREE.MeshStandardMaterial({
+                        color: 0x38bdf8,
+                        transparent: true,
+                        opacity: 0.6,
+                        wireframe: isWireframe
+                    });
+                    const cell = new THREE.Mesh(cGeo, cMat);
+                    cell.position.set((Math.random() - 0.5) * 8.0, (Math.random() - 0.5) * 6.0, (Math.random() - 0.5) * 1.5);
+                    currentMeshGroup.add(cell);
+
+                    // Nucleus
+                    const nucGeo = new THREE.SphereGeometry(0.35, 16, 16);
+                    const nucMat = new THREE.MeshStandardMaterial({ color: 0x4338ca });
+                    const nuc = new THREE.Mesh(nucGeo, nucMat);
+                    nuc.position.copy(cell.position);
+                    currentMeshGroup.add(nuc);
+                }
+            } else {
+                // Pond Water Microorganisms: Paramecium (slipper shaped)
+                const protozoaGroup = new THREE.Group();
+                protozoaGroup.name = 'pondMicrobes';
+
+                for (let i = 0; i < 5; i++) {
+                    const pGeo = new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.4, 1.4, 12, 24) : new THREE.CylinderGeometry(0.4, 0.3, 1.6, 16);
+                    const pMat = new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.3, transparent: true, opacity: 0.85 });
+                    const microbe = new THREE.Mesh(pGeo, pMat);
+                    microbe.position.set((Math.random() - 0.5) * 8.0, (Math.random() - 0.5) * 6.0, 0);
+                    microbe.rotation.z = Math.random() * Math.PI;
+                    protozoaGroup.add(microbe);
+                }
+                currentMeshGroup.add(protozoaGroup);
+            }
+        }
+
+        function buildBiologyEcosystemScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-emerald">ชีววิทยา: จำลองระบบนิเวศ &amp; พลวัตห่วงโซ่อาหาร (Lotka-Volterra)</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-tree text-emerald-400"></i> จำลองระบบนิเวศ (Ecosystem)`;
+            document.getElementById('sim-ai-title').innerText = "ความสมดุลของระบบนิเวศและห่วงโซ่อาหาร";
+            document.getElementById('sim-ai-desc').innerText = "ปรับจำนวนผู้ผลิต ผู้บริโภคพืช และผู้ล่า เพื่อดูกราฟสมดุลประชากรตามธรรมชาติ";
+
+            // Visual 3D Landscape Terrain & Organisms
+            const terrainGeo = new THREE.CylinderGeometry(6.5, 6.8, 0.4, 32);
+            const terrainMat = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.8 });
+            const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+            terrain.position.y = -1.5;
+            currentMeshGroup.add(terrain);
+
+            // Trees (Producers)
+            for (let i = 0; i < 14; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const r = 2.0 + Math.random() * 3.8;
+                const treeGroup = new THREE.Group();
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+                trunk.position.y = 0.4;
+                const leaves = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.3, 8), new THREE.MeshStandardMaterial({ color: 0x10b981 }));
+                leaves.position.y = 1.2;
+                treeGroup.add(trunk);
+                treeGroup.add(leaves);
+                treeGroup.position.set(Math.cos(angle) * r, -1.3, Math.sin(angle) * r);
+                currentMeshGroup.add(treeGroup);
+            }
+
+            // UI Controls
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-emerald-400 font-semibold">1. ผู้ผลิต (พืช/หญ้า)</span>
+                            <span id="eco-p-label" class="font-mono font-bold text-white">100</span>
+                        </div>
+                        <input type="range" min="20" max="300" value="100" oninput="ecoProducers=parseFloat(this.value); document.getElementById('eco-p-label').innerText=this.value;" class="w-full accent-emerald-500 cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-blue-400 font-semibold">2. ผู้บริโภคพืช (กระต่าย/กวาง)</span>
+                            <span id="eco-h-label" class="font-mono font-bold text-white">50</span>
+                        </div>
+                        <input type="range" min="10" max="150" value="50" oninput="ecoPrey=parseFloat(this.value); document.getElementById('eco-h-label').innerText=this.value;" class="w-full accent-blue-500 cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-rose-400 font-semibold">3. ผู้ล่าชั้นยอด (หมาป่า/เสือ)</span>
+                            <span id="eco-c-label" class="font-mono font-bold text-white">15</span>
+                        </div>
+                        <input type="range" min="2" max="60" value="15" oninput="ecoPredators=parseFloat(this.value); document.getElementById('eco-c-label').innerText=this.value;" class="w-full accent-rose-500 cursor-pointer">
+                    </div>
+
+                    <button onclick="resetEcosystemChart()" class="btn-smooth w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white rounded-xl font-semibold shadow-md shadow-emerald-600/25 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>รีเซ็ตวงจรประชากร</span>
+                    </button>
+
+                    <div id="eco-status-text" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        ระบบนิเวศกำลังทำงาน: ประชากรกำลังแกว่งตัวตามธรรมชาติ (Predator-Prey Oscillations)
+                    </div>
+                </div>
+            `;
+
+            startEcosystemSimulation();
+        }
+
+        function startEcosystemSimulation() {
+            ecoHistory = { producers: [], prey: [], predators: [] };
+            if (ecoTimer) clearInterval(ecoTimer);
+
+            ecoTimer = setInterval(() => {
+                // Lotka-Volterra differential approximation
+                const alpha = 0.08, beta = 0.0012, gamma = 0.04, delta = 0.0006;
+                const dPrey = (alpha * ecoPrey - beta * ecoPrey * ecoPredators) * 0.4;
+                const dPred = (delta * ecoPrey * ecoPredators - gamma * ecoPredators) * 0.4;
+
+                ecoPrey = Math.max(5, Math.min(220, ecoPrey + dPrey));
+                ecoPredators = Math.max(2, Math.min(100, ecoPredators + dPred));
+                ecoProducers = Math.max(20, Math.min(300, ecoProducers + (150 - ecoPrey * 0.7) * 0.08));
+
+                ecoHistory.prey.push(ecoPrey);
+                ecoHistory.predators.push(ecoPredators);
+                ecoHistory.producers.push(ecoProducers);
+
+                if (ecoHistory.prey.length > 50) {
+                    ecoHistory.prey.shift();
+                    ecoHistory.predators.shift();
+                    ecoHistory.producers.shift();
+                }
+
+                drawEcosystemChart();
+            }, 250);
+        }
+
+        function resetEcosystemChart() {
+            ecoPrey = 50;
+            ecoPredators = 15;
+            ecoProducers = 100;
+            document.getElementById('eco-h-label').innerText = '50';
+            document.getElementById('eco-c-label').innerText = '15';
+            document.getElementById('eco-p-label').innerText = '100';
+            startEcosystemSimulation();
+        }
+
+        function drawEcosystemChart() {
+            const canvas = document.getElementById('eco-chart-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Grid Lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, h * 0.25); ctx.lineTo(w, h * 0.25);
+            ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5);
+            ctx.moveTo(0, h * 0.75); ctx.lineTo(w, h * 0.75);
+            ctx.stroke();
+
+            // Function to plot line
+            const plotSeries = (data, color, maxVal) => {
+                if (data.length < 2) return;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const step = w / 50;
+                for (let i = 0; i < data.length; i++) {
+                    const x = i * step;
+                    const y = h - (data[i] / maxVal) * (h * 0.88);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            };
+
+            plotSeries(ecoHistory.producers, '#10b981', 300);
+            plotSeries(ecoHistory.prey, '#60a5fa', 220);
+            plotSeries(ecoHistory.predators, '#f43f5e', 80);
+        }
+
+        /* -------------------------------------------------------------
+           3. PHYSICS MODULE: NEWTON'S LAWS & 3D FORCES & CENTRIPETAL
+        ------------------------------------------------------------- */
+        function buildPhysicsNewtonScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-amber">ฟิสิกส์: กฎการเคลื่อนที่ของนิวตัน &amp; Free-Body Diagram 3 มิติ</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-arrows-to-dot text-amber-400"></i> กฎการเคลื่อนที่ของนิวตัน (Newton's Laws)`;
+            document.getElementById('sim-ai-title').innerText = "กฎการเคลื่อนที่ 3 ข้อของเซอร์ไอแซก นิวตัน";
+            document.getElementById('sim-ai-desc').innerText = "ทดสอบแรงดึง มวล แรงเสียดทาน และมุมพื้นเอียง พร้อมสังเกตเวกเตอร์แรงลัพธ์ 3 มิติ";
+
+            // Track Ground / Inclined Surface
+            const trackGeo = new THREE.BoxGeometry(16.0, 0.4, 4.0);
+            const trackMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+            const track = new THREE.Mesh(trackGeo, trackMat);
+            track.name = 'physTrack';
+            track.position.y = -1.2;
+            currentMeshGroup.add(track);
+
+            // Object Mass Block
+            const blockGeo = new THREE.BoxGeometry(2.0, 1.4, 2.0);
+            const blockMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.2, wireframe: isWireframe });
+            physBlockMesh = new THREE.Mesh(blockGeo, blockMat);
+            physBlockMesh.position.set(physPositionX, -0.3, 0);
+            currentMeshGroup.add(physBlockMesh);
+
+            // 3D Vector Arrows (FBD)
+            // 1. Gravity (Down - Yellow)
+            physFbdArrows.gravity = new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), physBlockMesh.position, 2.0, 0xfacc15, 0.4, 0.2);
+            // 2. Normal Force (Up - Green)
+            physFbdArrows.normal = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), physBlockMesh.position, 2.0, 0x10b981, 0.4, 0.2);
+            // 3. Applied Force (Right - Cyan)
+            physFbdArrows.applied = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), physBlockMesh.position, 2.5, 0x38bdf8, 0.4, 0.2);
+            // 4. Friction (Left - Red)
+            physFbdArrows.friction = new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), physBlockMesh.position, 1.2, 0xf43f5e, 0.4, 0.2);
+
+            currentMeshGroup.add(physFbdArrows.gravity);
+            currentMeshGroup.add(physFbdArrows.normal);
+            currentMeshGroup.add(physFbdArrows.applied);
+            currentMeshGroup.add(physFbdArrows.friction);
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-amber-400 font-semibold">มวลของวัตถุ (Mass - m)</span>
+                            <span id="phys-m-lbl" class="font-mono font-bold text-white">10 kg</span>
+                        </div>
+                        <input type="range" min="1" max="50" value="10" oninput="physMass=parseFloat(this.value); document.getElementById('phys-m-lbl').innerText=this.value+' kg'; updateNewtonCalculations();" class="w-full accent-amber-500 cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-cyan-400 font-semibold">แรงดึงภายนอก (Applied Force - F)</span>
+                            <span id="phys-f-lbl" class="font-mono font-bold text-white">40 N</span>
+                        </div>
+                        <input type="range" min="0" max="150" value="40" oninput="physAppliedForce=parseFloat(this.value); document.getElementById('phys-f-lbl').innerText=this.value+' N'; updateNewtonCalculations();" class="w-full accent-cyan-500 cursor-pointer">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-rose-400">สัมประสิทธิ์แรงเสียดทาน (µ)</span>
+                                <span id="phys-u-lbl" class="font-mono font-bold text-white">0.20</span>
+                            </div>
+                            <input type="range" min="0" max="0.8" step="0.05" value="0.2" oninput="physFrictionCoeff=parseFloat(this.value); document.getElementById('phys-u-lbl').innerText=this.value; updateNewtonCalculations();" class="w-full accent-rose-500 cursor-pointer">
+                        </div>
+                        <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-800">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-emerald-400">มุมพื้นเอียง (θ)</span>
+                                <span id="phys-th-lbl" class="font-mono font-bold text-white">0°</span>
+                            </div>
+                            <input type="range" min="0" max="45" value="0" oninput="physInclineAngle=parseFloat(this.value); document.getElementById('phys-th-lbl').innerText=this.value+'°'; updateNewtonCalculations();" class="w-full accent-emerald-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <button onclick="resetPhysicsMotion()" class="btn-smooth w-full py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 text-white rounded-xl font-semibold shadow-md shadow-amber-600/25 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i>
+                        <span>ปล่อยวัตถุ &amp; รีเซ็ตตำแหน่งเริ่มต้น</span>
+                    </button>
+
+                    <div id="phys-newton-card" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            `;
+            updateNewtonCalculations();
+        }
+
+        function updateNewtonCalculations() {
+            const g = 9.8;
+            const thetaRad = (physInclineAngle * Math.PI) / 180;
+            const normalForce = physMass * g * Math.cos(thetaRad);
+            const gravityParallel = physMass * g * Math.sin(thetaRad);
+            const maxStaticFriction = physFrictionCoeff * normalForce;
+
+            // Net force equation: F_net = F_app - (f_k + mg*sin(theta))
+            let frictionForce = 0;
+            let netForce = 0;
+
+            if (physAppliedForce > (gravityParallel + maxStaticFriction)) {
+                frictionForce = maxStaticFriction;
+                netForce = physAppliedForce - gravityParallel - frictionForce;
+            } else if (physAppliedForce < (gravityParallel - maxStaticFriction)) {
+                frictionForce = -maxStaticFriction;
+                netForce = physAppliedForce - gravityParallel - frictionForce;
+            } else {
+                frictionForce = physAppliedForce - gravityParallel;
+                netForce = 0; // Static equilibrium (Newton's 1st Law)
+            }
+
+            const acceleration = netForce / physMass;
+
+            // Update Track Rotation if inclined
+            const track = currentMeshGroup.getObjectByName('physTrack');
+            if (track) {
+                track.rotation.z = thetaRad;
+            }
+
+            // Update Vector Arrow lengths
+            if (physFbdArrows.gravity) physFbdArrows.gravity.setLength(Math.min(3.5, physMass * g * 0.025));
+            if (physFbdArrows.normal) physFbdArrows.normal.setLength(Math.min(3.5, normalForce * 0.025));
+            if (physFbdArrows.applied) physFbdArrows.applied.setLength(Math.min(4.0, Math.max(0.6, physAppliedForce * 0.03)));
+            if (physFbdArrows.friction) physFbdArrows.friction.setLength(Math.min(3.0, Math.max(0.5, Math.abs(frictionForce) * 0.04)));
+
+            const res = document.getElementById('phys-newton-card');
+            if (res) {
+                res.innerHTML = `
+                    <div class="text-amber-300 font-bold mb-1">✓ วิเคราะห์แรงตามกฎของนิวตัน:</div>
+                    <div>• แรงลัพธ์ (ΣF): <b class="${netForce > 0 ? 'text-cyan-400' : 'text-slate-400'}">${netForce.toFixed(2)} N</b></div>
+                    <div>• ความเร่ง (a = ΣF/m): <b class="text-amber-400">${acceleration.toFixed(2)} m/s²</b></div>
+                    <div>• แรงตั้งฉาก (N): ${normalForce.toFixed(1)} N | แรงเสียดทาน (f): ${Math.abs(frictionForce).toFixed(1)} N</div>
+                    <div>• สภาวะ: <b class="text-white">${acceleration === 0 ? 'วัตถุหยุดนิ่ง / สมดุลแรง (กฎข้อที่ 1)' : 'วัตถุมีความเร่งต่อเนื่อง (กฎข้อที่ 2: F=ma)'}</b></div>
+                `;
+            }
+        }
+
+        function resetPhysicsMotion() {
+            physPositionX = -5.5;
+            physVelocityX = 0;
+            if (physBlockMesh) physBlockMesh.position.x = physPositionX;
+        }
+
+        function buildPhysicsCircularScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-amber">ฟิสิกส์: การเคลื่อนที่แบบวงกลม &amp; แรงสู่ศูนย์กลาง (F_c)</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-circle-notch text-amber-400"></i> การเคลื่อนที่แบบวงกลม`;
+            document.getElementById('sim-ai-title').innerText = "แรงสู่ศูนย์กลางและอัตราเร็วเชิงมุม";
+            document.getElementById('sim-ai-desc').innerText = "คำนวณเวกเตอร์แรงสู่ศูนย์กลาง (F_c) และพลังงานจลย์ (E_k) แบบเรียลไทม์";
+
+            // Central Core
+            const core = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x1d4ed8, emissiveIntensity: 0.6 }));
+            currentMeshGroup.add(core);
+
+            // Orbit Ring
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(physCentripetalRadius, 0.04, 16, 120), new THREE.MeshBasicMaterial({ color: 0x60a5fa }));
+            ring.name = 'circTrack';
+            ring.rotation.x = Math.PI / 2;
+            currentMeshGroup.add(ring);
+
+            // Mass
+            physOrbitalMesh = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 32), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.2 }));
+            physOrbitalMesh.position.set(physCentripetalRadius, 0, 0);
+            currentMeshGroup.add(physOrbitalMesh);
+
+            // Arrows
+            physFcArrow = new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), physOrbitalMesh.position, 2.0, 0xfacc15, 0.5, 0.25);
+            physVelArrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), physOrbitalMesh.position, 1.8, 0x38bdf8, 0.45, 0.2);
+            currentMeshGroup.add(physFcArrow);
+            currentMeshGroup.add(physVelArrow);
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-amber-400 font-semibold">มวลวัตถุ (m)</span>
+                            <span id="circ-m-lbl" class="font-mono font-bold text-white">10 kg</span>
+                        </div>
+                        <input type="range" min="2" max="50" value="10" oninput="physMass=parseFloat(this.value); document.getElementById('circ-m-lbl').innerText=this.value+' kg';" class="w-full accent-amber-500 cursor-pointer">
+                    </div>
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-cyan-400 font-semibold">อัตราเร็วเชิงเส้น (v)</span>
+                            <span id="circ-v-lbl" class="font-mono font-bold text-white">20 m/s</span>
+                        </div>
+                        <input type="range" min="5" max="50" value="20" oninput="physCentripetalSpeed=parseFloat(this.value); document.getElementById('circ-v-lbl').innerText=this.value+' m/s';" class="w-full accent-cyan-500 cursor-pointer">
+                    </div>
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-blue-400 font-semibold">รัศมีวงโคจร (r)</span>
+                            <span id="circ-r-lbl" class="font-mono font-bold text-white">4.5 m</span>
+                        </div>
+                        <input type="range" min="2.5" max="7.0" step="0.5" value="4.5" oninput="physCentripetalRadius=parseFloat(this.value); document.getElementById('circ-r-lbl').innerText=this.value+' m'; updateCircRadius();" class="w-full accent-blue-500 cursor-pointer">
+                    </div>
+
+                    <div id="circ-result-card" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        คำนวณแบบเรียลไทม์: F_c = mv²/r และ E_k = ½mv²
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCircRadius() {
+            const track = currentMeshGroup.getObjectByName('circTrack');
+            if (track) {
+                track.geometry.dispose();
+                track.geometry = new THREE.TorusGeometry(physCentripetalRadius, 0.04, 16, 120);
+            }
+        }
+
+        /* -------------------------------------------------------------
+           4. ASTRONOMY MODULE: KEPLER'S LAWS & CONSTELLATION MOTION
+        ------------------------------------------------------------- */
+        function buildAstronomyKeplerScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-purple">ดาราศาสตร์: กลศาสตร์อวกาศ &amp; กฎ 3 ข้อของเคปเลอร์</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-satellite text-purple-400"></i> กลศาสตร์อวกาศ (Kepler's Laws)`;
+            document.getElementById('sim-ai-title').innerText = "กฎการเคลื่อนที่ของดาวเคราะห์ของเคปเลอร์";
+            document.getElementById('sim-ai-desc').innerText = "ปรับความรีวงโคจร (Eccentricity) เพื่อสังเกตการแปรผันของความเร็วและพื้นที่กวาดเท่ากัน";
+
+            // Sun at one of the focal points
+            const sunGeo = new THREE.SphereGeometry(1.5, 32, 32);
+            const sunMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+            const sun = new THREE.Mesh(sunGeo, sunMat);
+            currentMeshGroup.add(sun);
+
+            // Orbiting Planet
+            const planetGeo = new THREE.SphereGeometry(0.55, 24, 24);
+            const planetMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3 });
+            astroPlanetMesh = new THREE.Mesh(planetGeo, planetMat);
+            currentMeshGroup.add(astroPlanetMesh);
+
+            renderKeplerOrbitLine();
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-purple-400 font-semibold">ความรีของวงโคจร (Eccentricity - e)</span>
+                            <span id="kepler-e-lbl" class="font-mono font-bold text-white">0.50</span>
+                        </div>
+                        <input type="range" min="0.0" max="0.75" step="0.05" value="0.50" oninput="astroEccentricity=parseFloat(this.value); document.getElementById('kepler-e-lbl').innerText=this.value; renderKeplerOrbitLine();" class="w-full accent-purple-500 cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-cyan-400 font-semibold">กึ่งแกนเอก (Semi-major Axis - a)</span>
+                            <span id="kepler-a-lbl" class="font-mono font-bold text-white">6.0 AU</span>
+                        </div>
+                        <input type="range" min="3.5" max="8.0" step="0.5" value="6.0" oninput="astroSemiMajorAxis=parseFloat(this.value); document.getElementById('kepler-a-lbl').innerText=this.value+' AU'; renderKeplerOrbitLine();" class="w-full accent-cyan-500 cursor-pointer">
+                    </div>
+
+                    <div id="kepler-calc-card" class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        <!-- Populated by updateKeplerCalculations -->
+                    </div>
+                </div>
+            `;
+            updateKeplerCalculations();
+        }
+
+        function renderKeplerOrbitLine() {
+            const old = currentMeshGroup.getObjectByName('keplerOrbitCurve');
+            if (old) currentMeshGroup.remove(old);
+
+            const a = astroSemiMajorAxis;
+            const e = astroEccentricity;
+            const b = a * Math.sqrt(1 - e * e); // Semi-minor axis
+            const c = a * e; // Focal distance
+
+            const points = [];
+            for (let i = 0; i <= 100; i++) {
+                const theta = (i / 100) * Math.PI * 2;
+                // Shift ellipse so Sun is at focal point (0,0)
+                const x = a * Math.cos(theta) - c;
+                const z = b * Math.sin(theta);
+                points.push(new THREE.Vector3(x, 0, z));
+            }
+
+            const orbitGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const orbitMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.65 });
+            const line = new THREE.Line(orbitGeo, orbitMat);
+            line.name = 'keplerOrbitCurve';
+            currentMeshGroup.add(line);
+
+            updateKeplerCalculations();
+        }
+
+        function updateKeplerCalculations() {
+            const a = astroSemiMajorAxis;
+            const e = astroEccentricity;
+            const T = Math.sqrt(a ** 3).toFixed(2); // Kepler's 3rd Law: T^2 = a^3
+            const rPeri = (a * (1 - e)).toFixed(2); // Closest distance (Perihelion)
+            const rAph = (a * (1 + e)).toFixed(2);  // Farthest distance (Aphelion)
+
+            const card = document.getElementById('kepler-calc-card');
+            if (card) {
+                card.innerHTML = `
+                    <div class="text-purple-300 font-bold mb-1">✓ กฎ 3 ข้อของเคปเลอร์ (Kepler's Laws):</div>
+                    <div>• <b>กฎข้อ 1:</b> วงโคจรทรงรี (Elliptical) e = ${e.toFixed(2)}</div>
+                    <div>• <b>กฎข้อ 2:</b> กวาดพื้นที่เท่ากันในเวลาเท่ากัน (เร็วสุดที่จุด Perihelion ${rPeri} AU และช้าสุดที่ Aphelion ${rAph} AU)</div>
+                    <div>• <b>กฎข้อ 3:</b> คาบการโคจร T = √(a³) = <b class="text-cyan-300">${T} ปีโลก</b></div>
+                `;
+            }
+        }
+
+        function buildAstronomyConstellationScene() {
+            document.getElementById('sim-status-title').innerHTML = `<span class="neon-text-purple">ดาราศาสตร์: ทรงกลมท้องฟ้า &amp; การเคลื่อนที่ของกลุ่มดาวรอบดาวเหนือ</span>`;
+            document.getElementById('control-panel-title').innerHTML = `<i class="fa-solid fa-star text-purple-400"></i> การเคลื่อนที่ของกลุ่มดาว (Constellations)`;
+            document.getElementById('sim-ai-title').innerText = "การหมุนของทรงกลมท้องฟ้า (Diurnal Motion)";
+            document.getElementById('sim-ai-desc').innerText = "เลื่อนเวลา 24 ชม. เพื่อสังเกตการหมุนของกลุ่มดาวข้ามขอบฟ้า และตำแหน่งดาวเหนือ";
+
+            // 3D Celestial Sky Dome Sphere
+            const domeGeo = new THREE.SphereGeometry(18, 32, 32);
+            const domeMat = new THREE.MeshBasicMaterial({ color: 0x1e1b4b, wireframe: true, transparent: true, opacity: 0.15 });
+            currentMeshGroup.add(new THREE.Mesh(domeGeo, domeMat));
+
+            // Polaris (North Star)
+            const polarisGeo = new THREE.SphereGeometry(0.45, 16, 16);
+            const polarisMat = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
+            const polaris = new THREE.Mesh(polarisGeo, polarisMat);
+            polaris.position.set(0, 16, 0);
+            currentMeshGroup.add(polaris);
+
+            // Container for rotating constellations
+            constellationGroup = new THREE.Group();
+            constellationGroup.name = 'constellationGroup';
+            currentMeshGroup.add(constellationGroup);
+
+            // Build Orion, Ursa Major, Cassiopeia
+            buildConstellationCluster();
+
+            document.getElementById('sim-controls').innerHTML = `
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">เลือกกลุ่มดาวเด่น</label>
+                        <select id="const-select" onchange="astroSelectedConstellation=this.value;" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-purple-500 font-medium">
+                            <option value="all">แสดงกลุ่มดาวทั้งหมดบนทรงกลมท้องฟ้า</option>
+                            <option value="orion">กลุ่มดาวนายพราน (Orion — Betelgeuse &amp; Rigel)</option>
+                            <option value="ursa">กลุ่มดาวหมีใหญ่ (Ursa Major — กระบวยตักน้ำ)</option>
+                            <option value="cas">กลุ่มดาวแคสซิโอเปีย (Cassiopeia — ค้างคาวตัว W)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-purple-400 font-semibold">จำลองเวลาในรอบวัน (Diurnal Time: 00:00 - 24:00)</span>
+                            <span id="time-lbl" class="font-mono font-bold text-white">12:00 น.</span>
+                        </div>
+                        <input type="range" min="0" max="24" step="0.5" value="12" oninput="astroTimeOfDay=parseFloat(this.value); document.getElementById('time-lbl').innerText=this.value+':00 น.'; updateConstellationRotation();" class="w-full accent-purple-500 cursor-pointer">
+                    </div>
+
+                    <div class="p-3 bg-slate-950/90 rounded-xl border border-slate-800/80 text-[11px] text-slate-300 leading-relaxed font-mono">
+                        <div class="text-purple-300 font-bold mb-1">การเคลื่อนที่ปรากฏของทรงกลมท้องฟ้า:</div>
+                        <div>• โลกหมุนรอบตัวเองจากทิศตะวันตกไปตะวันออก</div>
+                        <div>• ส่งผลให้ดาวทั้งฟ้าหมุนรอบดาวเหนือ (Polaris) ทวนเข็มนาฬิกา 360° ในรอบ 24 ชั่วโมง</div>
+                    </div>
+                </div>
+            `;
+            updateConstellationRotation();
+        }
+
+        function buildConstellationCluster() {
+            if (!constellationGroup) return;
+
+            const addConstLines = (points, lines, starColor) => {
+                const sGeo = new THREE.SphereGeometry(0.3, 16, 16);
+                const sMat = new THREE.MeshBasicMaterial({ color: starColor });
+                points.forEach(p => {
+                    const s = new THREE.Mesh(sGeo, sMat);
+                    s.position.copy(p);
+                    constellationGroup.add(s);
+                });
+                lines.forEach(pair => {
+                    const lGeo = new THREE.BufferGeometry().setFromPoints([points[pair[0]], points[pair[1]]]);
+                    const lMat = new THREE.LineBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.7 });
+                    constellationGroup.add(new THREE.Line(lGeo, lMat));
+                });
+            };
+
+            // Orion (Equatorial)
+            const orionPts = [
+                new THREE.Vector3(7, 3, 5),   // Betelgeuse
+                new THREE.Vector3(10, 2.5, 4), // Bellatrix
+                new THREE.Vector3(8.2, 0.5, 5), // Belt 1
+                new THREE.Vector3(8.6, 0.4, 4.7), // Belt 2
+                new THREE.Vector3(9.0, 0.3, 4.4), // Belt 3
+                new THREE.Vector3(7.5, -2.5, 5), // Saiph
+                new THREE.Vector3(10.2, -2.8, 3.8) // Rigel
+            ];
+            addConstLines(orionPts, [[0,1],[0,2],[1,4],[2,3],[3,4],[2,5],[4,6],[5,6]], 0xfb923c);
+
+            // Ursa Major (Near North Pole)
+            const ursaPts = [
+                new THREE.Vector3(-4, 10, -5),
+                new THREE.Vector3(-2, 10.5, -5.5),
+                new THREE.Vector3(0, 9.8, -6),
+                new THREE.Vector3(2, 9.0, -6),
+                new THREE.Vector3(3.2, 7.2, -5.8),
+                new THREE.Vector3(4.8, 7.4, -4.5),
+                new THREE.Vector3(3.6, 9.2, -4.7)
+            ];
+            addConstLines(ursaPts, [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3]], 0x67e8f9);
+
+            // Cassiopeia (W Shape)
+            const casPts = [
+                new THREE.Vector3(-8, 11, 2),
+                new THREE.Vector3(-6.5, 12, 1),
+                new THREE.Vector3(-5, 11, 2),
+                new THREE.Vector3(-3.5, 12.5, 1.2),
+                new THREE.Vector3(-2, 11.5, 2.2)
+            ];
+            addConstLines(casPts, [[0,1],[1,2],[2,3],[3,4]], 0xf472b6);
+        }
+
+        function updateConstellationRotation() {
+            if (constellationGroup) {
+                const angle = (astroTimeOfDay / 24) * Math.PI * 2;
+                constellationGroup.rotation.y = angle;
+            }
+        }
+
+        /* -------------------------------------------------------------
+           REALTIME SIMULATION UPDATE DISPATCHER
+        ------------------------------------------------------------- */
+        function updateRealtimeSimulation(delta, elapsed) {
+            // 1. Chemistry Stirrer & Particles
+            if (currentSubMode === 'chem_mix') {
+                const stirrer = currentMeshGroup.getObjectByName('stirrerBar');
+                if (stirrer) stirrer.rotation.y += delta * 15;
+            } else if (currentSubMode === 'chem_matter') {
+                const parts = currentMeshGroup.getObjectByName('matterParticles');
+                if (parts) {
+                    if (chemSelectedMatter === 'states_solid') {
+                        parts.children.forEach(p => {
+                            p.position.x += (Math.random() - 0.5) * 0.02;
+                            p.position.y += (Math.random() - 0.5) * 0.02;
+                        });
+                    } else if (chemSelectedMatter === 'states_liquid') {
+                        parts.children.forEach(p => {
+                            p.position.x += Math.sin(elapsed * 2 + p.id) * 0.015;
+                            p.position.z += Math.cos(elapsed * 2 + p.id) * 0.015;
+                        });
+                    } else if (chemSelectedMatter === 'states_gas') {
+                        parts.children.forEach(p => {
+                            p.position.x += (Math.random() - 0.5) * 0.15;
+                            p.position.y += (Math.random() - 0.5) * 0.15;
+                            p.position.z += (Math.random() - 0.5) * 0.15;
+                            p.position.clampScalar(-2.3, 2.3);
+                        });
+                    }
+                }
+            }
+
+            // 2. Biology Microbes Swimming
+            if (currentSubMode === 'bio_micro' && bioSpecimen === 'pond') {
+                const microbes = currentMeshGroup.getObjectByName('pondMicrobes');
+                if (microbes) {
+                    microbes.children.forEach((m, idx) => {
+                        m.position.x += Math.cos(elapsed * 1.5 + idx) * 0.02;
+                        m.position.y += Math.sin(elapsed * 1.5 + idx) * 0.02;
+                    });
+                }
+            }
+
+            // 3. Physics Motion
+            if (currentSubMode === 'phys_newton') {
+                const g = 9.8;
+                const thetaRad = (physInclineAngle * Math.PI) / 180;
+                const normalForce = physMass * g * Math.cos(thetaRad);
+                const gravityParallel = physMass * g * Math.sin(thetaRad);
+                const maxFriction = physFrictionCoeff * normalForce;
+
+                let netForce = 0;
+                if (physAppliedForce > (gravityParallel + maxFriction)) {
+                    netForce = physAppliedForce - gravityParallel - maxFriction;
+                } else if (physAppliedForce < (gravityParallel - maxFriction)) {
+                    netForce = physAppliedForce - gravityParallel + maxFriction;
+                } else {
+                    netForce = 0;
+                }
+
+                const acc = netForce / physMass;
+                physVelocityX += acc * delta;
+                physPositionX += physVelocityX * delta;
+
+                if (physPositionX > 5.8) {
+                    physPositionX = -5.8;
+                    physVelocityX = 0;
+                }
+
+                if (physBlockMesh) {
+                    physBlockMesh.position.x = physPositionX * Math.cos(thetaRad);
+                    physBlockMesh.position.y = -0.3 + physPositionX * Math.sin(thetaRad);
+                    physBlockMesh.rotation.z = thetaRad;
+
+                    // Update Arrow positions to follow block
+                    Object.values(physFbdArrows).forEach(arrow => {
+                        arrow.position.copy(physBlockMesh.position);
+                    });
+                }
+            } else if (currentSubMode === 'phys_circular') {
+                const omega = (physCentripetalSpeed / physCentripetalRadius) * 0.4;
+                physCentripetalAngle += omega * delta;
+
+                if (physOrbitalMesh) {
+                    const px = Math.cos(physCentripetalAngle) * physCentripetalRadius;
+                    const pz = Math.sin(physCentripetalAngle) * physCentripetalRadius;
+                    physOrbitalMesh.position.set(px, 0, pz);
+
+                    if (physFcArrow) {
+                        physFcArrow.position.set(px, 0, pz);
+                        physFcArrow.setDirection(new THREE.Vector3(-px, 0, -pz).normalize());
+                        const Fc = (physMass * physCentripetalSpeed * physCentripetalSpeed) / physCentripetalRadius;
+                        physFcArrow.setLength(Math.min(3.8, Math.max(0.8, Fc * 0.003)));
+                    }
+                    if (physVelArrow) {
+                        physVelArrow.position.set(px, 0, pz);
+                        physVelArrow.setDirection(new THREE.Vector3(-Math.sin(physCentripetalAngle), 0, Math.cos(physCentripetalAngle)).normalize());
+                    }
+                }
+            }
+
+            // 4. Astronomy Kepler Orbit
+            if (currentSubMode === 'astro_kepler' && astroPlanetMesh) {
+                const a = astroSemiMajorAxis;
+                const e = astroEccentricity;
+                const b = a * Math.sqrt(1 - e * e);
+                const c = a * e;
+
+                // Keplerian variable orbital speed (faster near perihelion)
+                const currentDist = a * (1 - e * Math.cos(astroOrbitalAngle));
+                const angularSpeed = (2.5 / (currentDist * currentDist)) * 4.0;
+                astroOrbitalAngle += angularSpeed * delta;
+
+                const px = a * Math.cos(astroOrbitalAngle) - c;
+                const pz = b * Math.sin(astroOrbitalAngle);
+                astroPlanetMesh.position.set(px, 0, pz);
+            }
+        }
+
+        /* -------------------------------------------------------------
+           VIEWPORT & CAMERA MODES
+        ------------------------------------------------------------- */
+        function cycleCameraView() {
+            cameraZoomStep = (cameraZoomStep + 1) % 3;
+            const btnText = document.getElementById('cam-preset-text');
+
+            if (cameraZoomStep === 0) {
+                targetCameraZ = 14; targetCameraY = 1.2; targetCameraX = 0;
+                btnText.innerText = "มุมมองหลัก";
+            } else if (cameraZoomStep === 1) {
+                targetCameraZ = 7.5; targetCameraY = 0.5; targetCameraX = 1.0;
+                btnText.innerText = "โคลสอัพ";
+            } else {
+                targetCameraZ = 22.0; targetCameraY = 3.5; targetCameraX = 0;
+                btnText.innerText = "มุมกว้าง";
+            }
+        }
+
+        function toggleWireframeMode() {
+            isWireframe = !isWireframe;
+            const btn = document.getElementById('wireframe-btn');
+            if (isWireframe) btn.classList.add('neon-box-purple', 'text-purple-300');
+            else btn.classList.remove('neon-box-purple', 'text-purple-300');
+            switchSubMode(currentSubMode);
+        }
+
+        function resetSceneOrientation() {
+            targetRotationX = 0; targetRotationY = 0;
+            targetCameraX = 0; targetCameraY = 1.2; targetCameraZ = 14;
+            rotationVelocityX = 0; rotationVelocityY = 0;
+            autoRotate = true;
+            document.getElementById('rotation-status').innerText = "Auto-Rotate: ON";
+        }
+
+        /* -------------------------------------------------------------
+           AI OBSERVATION & SCIENTIFIC EVALUATION
+        ------------------------------------------------------------- */
+        async function triggerSimAiAnalysis() {
+            const aiTitle = document.getElementById('sim-ai-title');
+            const aiDesc = document.getElementById('sim-ai-desc');
+            const badge = document.getElementById('ai-status-badge');
+
+            aiTitle.innerText = "NexusLab AI กำลังประมวลผลการทดลอง...";
+            aiDesc.innerText = "ระบบกำลังวิเคราะห์สมการ ทฤษฎีฟิสิกส์ และเคมีโมเลกุล...";
+            badge.innerText = "กำลังวิเคราะห์...";
+            badge.className = "text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/30 animate-pulse";
+
+            const prompt = `ในฐานะผู้เชี่ยวชาญวิทยาศาสตร์ สรุปและประเมินผลการทดลองสาขา ${currentSubject} (โหมด: ${currentSubMode}) ในห้องแล็บ NexusLab AI พร้อมให้ข้อคิดเห็นเชิงวิทยาศาสตร์ที่น่าสนใจและกระชับ 2 ประโยคเป็นภาษาไทย`;
+
+            try {
+                const data = await fetchGeminiAPI({
+                    contents: [{ parts: [{ text: prompt }] }]
+                });
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (responseText) {
+                    aiTitle.className = "text-xs font-bold text-slate-100 neon-text-blue";
+                    aiTitle.innerText = `NexusLab AI Insight (${currentSubject.toUpperCase()} - ${currentSubMode.toUpperCase()})`;
+                    aiDesc.innerText = responseText;
+                    badge.innerText = "วิเคราะห์สำเร็จ";
+                    badge.className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30 neon-text-emerald";
+                }
+            } catch (err) {
+                aiDesc.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อระบบ AI";
+                badge.innerText = "ข้อผิดพลาด";
+                badge.className = "text-[10px] bg-rose-500/20 text-rose-300 px-2.5 py-0.5 rounded-full border border-rose-500/30";
+            }
+        }
+
+        /* -------------------------------------------------------------
+           AI TUTOR CHAT SYSTEM
+        ------------------------------------------------------------- */
+        function useQuickPrompt(text) {
+            document.getElementById('ai-chat-input').value = text;
+            sendAiTutorMessage();
+        }
+
+        async function sendAiTutorMessage() {
+            const inputEl = document.getElementById('ai-chat-input');
+            const historyEl = document.getElementById('chat-history');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            historyEl.innerHTML += `
+                <div class="chat-bubble bg-blue-600/20 border border-blue-500/30 rounded-2xl p-3 text-blue-100 ml-4 shadow-sm">
+                    <span class="font-bold block text-[10px] text-blue-400 mb-1">คุณ:</span>
+                    ${escapeHtml(query)}
+                </div>
+            `;
+            inputEl.value = '';
+            historyEl.scrollTop = historyEl.scrollHeight;
+
+            const loadingId = 'loading-' + Date.now();
+            historyEl.innerHTML += `
+                <div id="${loadingId}" class="chat-bubble bg-purple-500/10 border border-purple-500/20 rounded-2xl p-3 text-purple-200 mr-4 animate-pulse shadow-sm">
+                    <span class="font-bold block text-[10px] text-purple-400 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> AI Tutor:
+                    </span>
+                    กำลังเรียบเรียงคำตอบและประมวลผลข้อมูลวิทยาศาสตร์...
+                </div>
+            `;
+            historyEl.scrollTop = historyEl.scrollHeight;
+
+            const prompt = `ในฐานะติวเตอร์วิทยาศาสตร์ใจดีและเชี่ยวชาญของ NexusLab AI ตอบคำถามนี้อย่างถูกต้อง แม่นยำ และเข้าใจง่ายเป็นภาษาไทย: "${query}"`;
+
+            try {
+                const data = await fetchGeminiAPI({
+                    contents: [{ parts: [{ text: prompt }] }]
+                });
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "ขออภัยครับ ไม่สามารถสร้างคำตอบได้ในขณะนี้";
+                
+                const loaderEl = document.getElementById(loadingId);
+                if (loaderEl) {
+                    loaderEl.outerHTML = `
+                        <div class="chat-bubble bg-purple-500/15 border border-purple-500/30 rounded-2xl p-3 text-purple-100 mr-4 shadow-sm leading-relaxed">
+                            <span class="font-bold block text-[10px] text-purple-300 mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                                <span class="neon-text-purple">AI Tutor:</span>
+                            </span>
+                            ${formatMarkdown(responseText)}
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                const loaderEl = document.getElementById(loadingId);
+                if (loaderEl) {
+                    loaderEl.outerHTML = `
+                        <div class="chat-bubble bg-rose-500/15 border border-rose-500/30 rounded-2xl p-3 text-rose-200 mr-4 shadow-sm">
+                            <span class="font-bold block text-[10px] text-rose-400 mb-1">AI Tutor:</span>
+                            ไม่สามารถเชื่อมต่อได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+                        </div>
+                    `;
+                }
+            }
+            historyEl.scrollTop = historyEl.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function formatMarkdown(text) {
+            let escaped = escapeHtml(text);
+            escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<b class="text-white">$1</b>');
+            escaped = escaped.replace(/\*(.*?)\*/g, '<i class="text-purple-200">$1</i>');
+            escaped = escaped.replace(/\n/g, '<br>');
+            return escaped;
+        }
+
+        function createCylinderMesh(vstart, vend, radius, material) {
+            const distance = vstart.distanceTo(vend);
+            const position = vend.clone().add(vstart).divideScalar(2);
+            const cylinderGeo = new THREE.CylinderGeometry(radius, radius, distance, 16, 1);
+            const orientation = new THREE.Matrix4();
+            const rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.lookAt(vstart, vend, new THREE.Object3D().up);
+            orientation.multiply(rotationMatrix);
+            orientation.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+            cylinderGeo.applyMatrix4(orientation);
+            const cylinder = new THREE.Mesh(cylinderGeo, material);
+            cylinder.position.copy(position);
+            return cylinder;
+        }
+
+        // Initialize on DOM load
+        window.addEventListener('load', () => {
+            init3D();
+        });
+    </script>
+</body>
+</html>
