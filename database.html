@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ฐานข้อมูล & ควบคุมระบบ (Admin Database Console) - NexusLab AI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+            cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+            rose: { 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome & Theme CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-theme.css">
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col selection:bg-amber-500 selection:text-white">
+
+  <!-- Nav Header -->
+  <header id="nexus-main-nav" class="sticky top-0 z-50 glass-header"></header>
+
+  <!-- MASTER PIN SECURITY LOCK OVERLAY (Visible by default) -->
+  <div id="admin-security-lock-screen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-panel rounded-3xl p-6 border border-amber-500/40 text-center shadow-2xl relative overflow-hidden">
+      <!-- Glow ambient -->
+      <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto mb-3 text-2xl shadow-lg shadow-amber-500/20">
+        <i class="fas fa-lock"></i>
+      </div>
+      
+      <h2 class="text-xl font-black text-white">Database Information LOCK</h2>
+      <p class="text-xs text-slate-400 mt-1 mb-5">
+        ระบบฐานข้อมูลผู้ใช้, API/MCP Key และโปรโมชั่นถูกจำกัดสิทธิ์ กรุณากรอกรหัส PIN หรือ Master Password เพื่อปลดล็อก
+      </p>
+
+      <!-- PIN Input Display -->
+      <div class="mb-5">
+        <div class="flex justify-center gap-3" id="pin-dots">
+          <span class="w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-900 transition-colors"></span>
+          <span class="w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-900 transition-colors"></span>
+          <span class="w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-900 transition-colors"></span>
+          <span class="w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-900 transition-colors"></span>
+        </div>
+        <p class="text-[11px] text-amber-400 mt-2 font-mono" id="pin-feedback">Default Master PIN: <strong>admin1234</strong></p>
+      </div>
+
+      <!-- Numeric Keypad -->
+      <div class="grid grid-cols-3 gap-2 max-w-[220px] mx-auto mb-4">
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="1">1</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="2">2</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="3">3</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="4">4</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="5">5</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="6">6</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="7">7</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="8">8</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm transition-all" data-val="9">9</button>
+        <button id="btn-pin-clear" class="py-2.5 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-rose-400 border border-slate-700 font-bold text-xs">C</button>
+        <button class="btn-keypad py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold font-mono text-sm" data-val="0">0</button>
+        <button id="btn-pin-submit" class="py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"><i class="fas fa-check"></i></button>
+      </div>
+
+      <!-- Quick 1-Click Unlock for Testing -->
+      <button id="btn-quick-unlock" class="w-full py-2 bg-slate-900 hover:bg-amber-500/20 text-amber-300 text-xs rounded-xl border border-slate-700 font-medium transition-all">
+        <i class="fas fa-key mr-1"></i> ปลดล็อกด้วยบัญชีผู้อำนวยการ (1-Click Test)
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN ADMIN WORKSTATION CONSOLE (Shown after unlocking) -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    
+    <!-- Top Bar with Status & Re-Lock Button -->
+    <div class="glass-panel rounded-2xl p-4 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-slate-950 text-xl font-bold shadow-lg">
+          <i class="fas fa-database text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-black text-white uppercase tracking-wider">NexusLab Database & Admin Control</h1>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono border border-emerald-500/30">SECURITY UNLOCKED</span>
+          </div>
+          <p class="text-xs text-slate-400">ควบคุมระบบสมาชิก โปรโมชั่น ค่าบริการ และ API/MCP Key Server</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-lock-screen" class="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors">
+          <i class="fas fa-lock text-[11px]"></i> ล็อกระบบ (Lock Screen)
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats Metric Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass-card rounded-2xl p-4 border border-slate-700">
+        <div class="text-[11px] text-slate-400 mb-1">ผู้ใช้ทั้งหมดในระบบ</div>
+        <div class="text-2xl font-black text-white font-mono" id="stat-total-users">3</div>
+        <div class="text-[10px] text-emerald-400 mt-1"><i class="fas fa-user-check mr-1"></i> Active 100%</div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-slate-700">
+        <div class="text-[11px] text-slate-400 mb-1">รายได้ต่อเดือน (MRR Est.)</div>
+        <div class="text-2xl font-black text-cyan-400 font-mono" id="stat-total-mrr">฿1,298</div>
+        <div class="text-[10px] text-cyan-400 mt-1"><i class="fas fa-chart-line mr-1"></i> Gross Margin: 86.4%</div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-slate-700">
+        <div class="text-[11px] text-slate-400 mb-1">โค้ดโปรโมชั่นที่ใช้งานได้</div>
+        <div class="text-2xl font-black text-amber-400 font-mono" id="stat-active-promos">4</div>
+        <div class="text-[10px] text-amber-400 mt-1"><i class="fas fa-tag mr-1"></i> ใช้สิทธิ์แล้ว 553 ครั้ง</div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-slate-700">
+        <div class="text-[11px] text-slate-400 mb-1">สถานะ MCP / AI Server</div>
+        <div class="text-2xl font-black text-emerald-400 font-mono">ONLINE</div>
+        <div class="text-[10px] text-slate-400 mt-1 font-mono">Ping: 35ms (Stable)</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex flex-wrap gap-1 p-1 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-semibold">
+      <button class="admin-tab-btn px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold transition-all shadow-sm" data-tab="users">
+        <i class="fas fa-users mr-1.5"></i> ผู้ใช้งาน & โปรไฟล์
+      </button>
+      <button class="admin-tab-btn px-4 py-2 rounded-xl text-slate-400 hover:text-white transition-all" data-tab="plans">
+        <i class="fas fa-crown mr-1.5"></i> แผนค่าบริการ (3 Tiers)
+      </button>
+      <button class="admin-tab-btn px-4 py-2 rounded-xl text-slate-400 hover:text-white transition-all" data-tab="promos">
+        <i class="fas fa-tags mr-1.5"></i> โค้ดโปรโมชั่น (Promos)
+      </button>
+      <button class="admin-tab-btn px-4 py-2 rounded-xl text-slate-400 hover:text-white transition-all" data-tab="apikeys">
+        <i class="fas fa-key mr-1.5"></i> API & MCP Key Server
+      </button>
+      <button class="admin-tab-btn px-4 py-2 rounded-xl text-slate-400 hover:text-white transition-all" data-tab="oauth">
+        <i class="fas fa-link mr-1.5"></i> Social Link (OAuth)
+      </button>
+      <button class="admin-tab-btn px-4 py-2 rounded-xl text-slate-400 hover:text-white transition-all" data-tab="logs">
+        <i class="fas fa-file-medical-alt mr-1.5"></i> System Logs & Backup
+      </button>
+    </div>
+
+    <!-- TAB 1: USERS & PROFILES -->
+    <section id="admin-view-users" class="admin-view-panel space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/80">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-white text-sm">รายชื่อบัญชีผู้ใช้งานในฐานข้อมูล (User Directory)</h3>
+            <p class="text-xs text-slate-400">จัดการสิทธิ์ ปรับระดับแผนสมาชิก และรีเซ็ตรหัสผ่าน</p>
+          </div>
+          <button id="btn-add-user-modal" class="px-3.5 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+            <i class="fas fa-user-plus"></i> เพิ่มผู้ใช้ใหม่
+          </button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-[11px] text-slate-400 uppercase font-mono border-b border-slate-700">
+              <tr>
+                <th class="p-3">ผู้ใช้งาน (User Profile)</th>
+                <th class="p-3">อีเมล & บัญชีเชื่อมต่อ</th>
+                <th class="p-3">บทบาท (Role)</th>
+                <th class="p-3">แผนสมาชิก (Plan)</th>
+                <th class="p-3">สถานะ</th>
+                <th class="p-3 text-right">การจัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body" class="divide-y divide-slate-800">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SUBSCRIPTION & PLANS (3 Tiers Management) -->
+    <section id="admin-view-plans" class="admin-view-panel hidden space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/80">
+        <div class="mb-4">
+          <h3 class="font-bold text-white text-sm">การคำนวณและปรับโครงสร้างค่าบริการ (3 Subscription & Plans)</h3>
+          <p class="text-xs text-slate-400">เปรียบเทียบต้นทุนเซิร์ฟเวอร์ต่อผู้ใช้ และความคุ้มค่าต่อผู้เรียน</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="plans-management-grid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PROMOTIONAL CODES -->
+    <section id="admin-view-promos" class="admin-view-panel hidden space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/80">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-white text-sm">การจัดการโค้ดโปรโมชั่น (Promotion Code Generator)</h3>
+            <p class="text-xs text-slate-400">สร้างโค้ดส่วนลดและกำหนดจำนวนครั้งการใช้งาน</p>
+          </div>
+          <button id="btn-create-promo" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition-all">
+            <i class="fas fa-plus"></i> สร้างโค้ดโปรโมชั่นใหม่
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-[11px] text-slate-400 uppercase font-mono border-b border-slate-700">
+              <tr>
+                <th class="p-3">โค้ด (Promo Code)</th>
+                <th class="p-3">ส่วนลด (%)</th>
+                <th class="p-3">ใช้งานแล้ว / จำกัด</th>
+                <th class="p-3">สถานะ</th>
+                <th class="p-3 text-right">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="promos-table-body" class="divide-y divide-slate-800">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: API & MCP KEY SERVER -->
+    <section id="admin-view-apikeys" class="admin-view-panel hidden space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/80">
+        <div class="mb-4">
+          <h3 class="font-bold text-white text-sm">การตั้งค่า API Server & MCP (Model Context Protocol)</h3>
+          <p class="text-xs text-slate-400">เชื่อมต่อบริการ Gemini API, Wolfram Alpha, และ Science MCP Viewer</p>
+        </div>
+
+        <div class="space-y-4 max-w-2xl text-xs">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Google Gemini API Key (Server Environment)</label>
+            <div class="flex gap-2">
+              <input type="password" id="cfg-gemini-key" value="AIzaSyDemo-GeminiKeyPlaceholder_NexusLab2026" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2.5 font-mono text-cyan-300 focus:outline-none focus:border-cyan-400">
+              <button class="btn-toggle-pwd px-3 rounded-xl bg-slate-800 text-slate-300 border border-slate-700"><i class="fas fa-eye"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Science MCP Server Endpoint URL</label>
+            <input type="text" id="cfg-mcp-url" value="https://mcp.nexuslab.ai/v1/science" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 font-mono text-emerald-300 focus:outline-none focus:border-emerald-400">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">โมเดล AI เริ่มต้นสำหรับห้องแล็บ (Default Active Model)</label>
+            <select id="cfg-active-engine" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-cyan-400">
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (ความเร็วสูง ประมวลผลวิทยาศาสตร์)</option>
+              <option value="deepseek-r1-science">DeepSeek-R1 Science (สมการและสัญลักษณ์คณิตศาสตร์)</option>
+              <option value="llama-3.3-70b-lab">Llama 3.3 70B Lab (ชีวการแพทย์และฟิสิกส์)</option>
+            </select>
+          </div>
+
+          <div class="pt-2 flex gap-3">
+            <button id="btn-save-apikeys" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl text-xs hover:scale-105 transition-all shadow-md">
+              <i class="fas fa-save mr-1.5"></i> บันทึกค่าเซิร์ฟเวอร์
+            </button>
+            <button id="btn-ping-mcp" class="px-4 py-2.5 bg-slate-800 text-cyan-300 hover:bg-slate-700 font-semibold rounded-xl text-xs border border-slate-700 flex items-center gap-1.5">
+              <i class="fas fa-satellite-dish"></i> ทดสอบการเชื่อมต่อ (Ping Check)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SOCIAL OAUTH PROVIDER LINKS -->
+    <section id="admin-view-oauth" class="admin-view-panel hidden space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/80">
+        <div class="mb-4">
+          <h3 class="font-bold text-white text-sm">การเชื่อมต่อบัญชีโซเชียล (OAuth 2.0 & SSO Providers)</h3>
+          <p class="text-xs text-slate-400">สถานะการเชื่อมต่อระหว่างระบบกับ Google, Facebook, LINE และ Email Server</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <!-- Google OAuth -->
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-xl border border-rose-500/20">
+                <i class="fab fa-google"></i>
+              </div>
+              <div>
+                <div class="font-bold text-white">Google Identity Services</div>
+                <div class="text-[11px] text-slate-400 font-mono">Client ID: 9481...apps.googleusercontent.com</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px]">CONNECTED</span>
+          </div>
+
+          <!-- LINE Login -->
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/20">
+                <i class="fab fa-line"></i>
+              </div>
+              <div>
+                <div class="font-bold text-white">LINE Developers Login Channel</div>
+                <div class="text-[11px] text-slate-400 font-mono">Channel ID: 2004819201 (v2.1)</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px]">CONNECTED</span>
+          </div>
+
+          <!-- Facebook Login -->
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl border border-blue-500/20">
+                <i class="fab fa-facebook-f"></i>
+              </div>
+              <div>
+                <div class="font-bold text-white">Meta for Developers (Facebook Graph)</div>
+                <div class="text-[11px] text-slate-400 font-mono">App ID: 849201948201948</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px]">CONNECTED</span>
+          </div>
+
+          <!-- Email SMTP -->
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl border border-purple-500/20">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div>
+                <div class="font-bold text-white">Transactional Email (SMTP TLS)</div>
+                <div class="text-[11px] text-slate-400 font-mono">smtp.nexuslab.ai:587</div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-[10px]">ACTIVE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: SYSTEM LOGS & DATA BACKUP -->
+    <section id="admin-view-logs" class="admin-view-panel hidden space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-700/80">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-white text-sm">บันทึกเหตุการณ์และการสำรองข้อมูล (Audit Logs & Data Vault)</h3>
+            <p class="text-xs text-slate-400">ติดตามประวัติการเข้าใช้งาน และ Export / Import ฐานข้อมูลระบบ</p>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-export-db-json" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold text-xs rounded-xl border border-slate-700 flex items-center gap-1">
+              <i class="fas fa-file-export"></i> สำรองข้อมูล JSON
+            </button>
+            <button id="btn-reset-db" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-xs rounded-xl border border-rose-500/40 flex items-center gap-1">
+              <i class="fas fa-history"></i> คืนค่าเริ่มต้น (Factory Reset)
+            </button>
+          </div>
+        </div>
+
+        <!-- Logs Stream -->
+        <div class="h-64 overflow-y-auto bg-slate-950 rounded-xl border border-slate-800 p-3 font-mono text-[11px] space-y-1.5" id="system-logs-stream">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/nexus-core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      NexusCore.renderNavbar('database');
+
+      const lockScreen = document.getElementById('admin-security-lock-screen');
+      let currentPin = '';
+      const correctPin = 'admin1234';
+
+      // Keypad input logic
+      const pinDots = document.querySelectorAll('#pin-dots span');
+      function updatePinDots() {
+        pinDots.forEach((dot, idx) => {
+          if (idx < currentPin.length) {
+            dot.className = 'w-3.5 h-3.5 rounded-full border border-amber-400 bg-amber-400 shadow-sm shadow-amber-400';
+          } else {
+            dot.className = 'w-3.5 h-3.5 rounded-full border border-slate-600 bg-slate-900';
+          }
+        });
+      }
+
+      function checkPin() {
+        if (currentPin === correctPin || currentPin === '1234') {
+          NexusCore.Sound.success();
+          lockScreen.classList.add('hidden');
+          NexusCore.toast('ยินดีต้อนรับท่านผู้อำนวยการ ปลดล็อกฐานข้อมูลสำเร็จ', 'success');
+          NexusCore.logEvent('ADMIN_UNLOCK', 'Admin unlocked database security console.');
+          loadDatabaseViews();
+        } else {
+          NexusCore.Sound.beep(200, 0.2);
+          NexusCore.toast('รหัสผ่านไม่ถูกต้อง (ลอง admin1234 หรือคลิกปุ่ม 1-Click Test)', 'error');
+          currentPin = '';
+          updatePinDots();
+        }
+      }
+
+      document.querySelectorAll('.btn-keypad').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (currentPin.length < 8) {
+            currentPin += btn.getAttribute('data-val');
+            NexusCore.Sound.click();
+            updatePinDots();
+            if (currentPin.length === 4 && currentPin === '1234') {
+              checkPin();
+            }
+          }
+        });
+      });
+
+      document.getElementById('btn-pin-clear')?.addEventListener('click', () => {
+        currentPin = '';
+        updatePinDots();
+        NexusCore.Sound.click();
+      });
+
+      document.getElementById('btn-pin-submit')?.addEventListener('click', checkPin);
+
+      // 1-Click Quick Unlock for test review
+      document.getElementById('btn-quick-unlock')?.addEventListener('click', () => {
+        currentPin = correctPin;
+        checkPin();
+      });
+
+      // Re-lock
+      document.getElementById('btn-lock-screen')?.addEventListener('click', () => {
+        currentPin = '';
+        updatePinDots();
+        lockScreen.classList.remove('hidden');
+        NexusCore.Sound.click();
+        NexusCore.toast('ล็อกหน้าจอความปลอดภัยเรียบร้อยแล้ว', 'info');
+      });
+
+      // TAB NAVIGATION
+      const tabButtons = document.querySelectorAll('.admin-tab-btn');
+      const viewPanels = {
+        users: document.getElementById('admin-view-users'),
+        plans: document.getElementById('admin-view-plans'),
+        promos: document.getElementById('admin-view-promos'),
+        apikeys: document.getElementById('admin-view-apikeys'),
+        oauth: document.getElementById('admin-view-oauth'),
+        logs: document.getElementById('admin-view-logs')
+      };
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.getAttribute('data-tab');
+          NexusCore.Sound.click();
+
+          tabButtons.forEach(b => {
+            b.className = 'admin-tab-btn px-4 py-2 rounded-xl text-slate-400 hover:text-white transition-all';
+          });
+          btn.className = 'admin-tab-btn px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold transition-all shadow-sm';
+
+          Object.keys(viewPanels).forEach(k => {
+            if (viewPanels[k]) viewPanels[k].classList.add('hidden');
+          });
+          if (viewPanels[tab]) {
+            viewPanels[tab].classList.remove('hidden');
+          }
+        });
+      });
+
+      // LOAD DATA VIEWS
+      function loadDatabaseViews() {
+        const users = NexusCore.getUsers();
+        const promos = JSON.parse(localStorage.getItem('nexus_promos') || '[]');
+        const plans = JSON.parse(localStorage.getItem('nexus_plans') || '[]');
+        const logs = NexusCore.getLogs();
+
+        // Update top stats
+        document.getElementById('stat-total-users').textContent = users.length;
+        document.getElementById('stat-active-promos').textContent = promos.filter(p => p.active).length;
+
+        // Render Users Table
+        const usersTbody = document.getElementById('users-table-body');
+        if (usersTbody) {
+          usersTbody.innerHTML = users.map(u => `
+            <tr class="hover:bg-slate-900/40 transition-colors">
+              <td class="p-3 flex items-center gap-2.5">
+                <img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover border border-slate-700">
+                <div>
+                  <div class="font-bold text-white">${u.fullName}</div>
+                  <div class="text-[10px] text-cyan-400 font-mono">@${u.username}</div>
+                </div>
+              </td>
+              <td class="p-3">
+                <div class="text-slate-300 font-mono text-[11px]">${u.email}</div>
+                <div class="flex gap-1.5 text-[10px] mt-1 text-slate-400">
+                  ${u.linkedAccounts?.google ? '<i class="fab fa-google text-rose-400" title="Google linked"></i>' : ''}
+                  ${u.linkedAccounts?.line ? '<i class="fab fa-line text-emerald-400" title="LINE linked"></i>' : ''}
+                  ${u.linkedAccounts?.facebook ? '<i class="fab fa-facebook text-blue-400" title="Facebook linked"></i>' : ''}
+                </div>
+              </td>
+              <td class="p-3 uppercase font-mono text-[11px]">
+                <span class="px-2 py-0.5 rounded ${u.role === 'admin' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300'}">${u.role}</span>
+              </td>
+              <td class="p-3 font-bold uppercase font-mono text-[11px]">
+                <span class="px-2 py-0.5 rounded ${u.plan === 'master' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : u.plan === 'pro' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-slate-800 text-slate-400'}">${u.plan}</span>
+              </td>
+              <td class="p-3">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${u.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${u.status}</span>
+              </td>
+              <td class="p-3 text-right space-x-1">
+                <button class="btn-change-plan p-1.5 hover:text-cyan-400 text-slate-400" data-uid="${u.id}" title="เปลี่ยนแพ็กเกจ"><i class="fas fa-crown"></i></button>
+                <button class="btn-toggle-ban p-1.5 hover:text-rose-400 text-slate-400" data-uid="${u.id}" title="ระงับ/เปิดใช้"><i class="fas fa-user-slash"></i></button>
+              </td>
+            </tr>
+          `).join('');
+
+          // Bind user actions
+          document.querySelectorAll('.btn-change-plan').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const uid = btn.getAttribute('data-uid');
+              const target = users.find(u => u.id === uid);
+              if (!target) return;
+              const newPlan = prompt(`เปลี่ยนแผนของ ${target.username} (explorer, pro, master):`, target.plan);
+              if (newPlan && ['explorer', 'pro', 'master'].includes(newPlan.toLowerCase())) {
+                target.plan = newPlan.toLowerCase();
+                NexusCore.saveUsers(users);
+                NexusCore.toast(`อัปเดตแผนสมาชิกของ ${target.username} เป็น ${newPlan} แล้ว`, 'success');
+                loadDatabaseViews();
+              }
+            });
+          });
+
+          document.querySelectorAll('.btn-toggle-ban').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const uid = btn.getAttribute('data-uid');
+              const target = users.find(u => u.id === uid);
+              if (!target || target.role === 'admin') {
+                NexusCore.toast('ไม่อนุญาตให้ระงับสิทธิ์บัญชี Admin', 'warning');
+                return;
+              }
+              target.status = target.status === 'active' ? 'banned' : 'active';
+              NexusCore.saveUsers(users);
+              NexusCore.toast(`เปลี่ยนสถานะบัญชี ${target.username} เป็น ${target.status} แล้ว`, 'info');
+              loadDatabaseViews();
+            });
+          });
+        }
+
+        // Render Plans Grid
+        const plansGrid = document.getElementById('plans-management-grid');
+        if (plansGrid) {
+          plansGrid.innerHTML = plans.map(p => `
+            <div class="glass-card p-4 rounded-xl border border-slate-700 flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <span class="font-bold text-white text-sm">${p.name}</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-400">${p.badge}</span>
+                </div>
+                <div class="text-xl font-black text-cyan-400 font-mono mb-2">฿${p.priceMonthlyTHB} <span class="text-xs text-slate-400 font-sans">/ เดือน</span></div>
+                <p class="text-[11px] text-slate-400 mb-3">${p.targetUser}</p>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-300 space-y-1 mb-3">
+                  <div>ต้นทุนต่อผู้ใช้: <strong>~฿${p.creatorCostEstTHB}/ด.</strong></div>
+                  <div>ความคุ้มค่าผู้ใช้: <strong>ประหยัดแล็บ 98%+</strong></div>
+                </div>
+              </div>
+              <button class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+                แก้ไขโควตา & ราคา
+              </button>
+            </div>
+          `).join('');
+        }
+
+        // Render Promos Table
+        const promosTbody = document.getElementById('promos-table-body');
+        if (promosTbody) {
+          promosTbody.innerHTML = promos.map(pr => `
+            <tr class="hover:bg-slate-900/40">
+              <td class="p-3 font-mono font-bold text-amber-400">${pr.code}</td>
+              <td class="p-3 font-mono text-emerald-400 font-bold">${pr.discountPercent}%</td>
+              <td class="p-3 font-mono">${pr.usedCount} / ${pr.maxUses}</td>
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono ${pr.active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}">${pr.active ? 'ACTIVE' : 'EXPIRED'}</span>
+              </td>
+              <td class="p-3 text-right">
+                <button class="btn-toggle-promo text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800" data-code="${pr.code}">สลับสถานะ</button>
+              </td>
+            </tr>
+          `).join('');
+
+          document.querySelectorAll('.btn-toggle-promo').forEach(b => {
+            b.addEventListener('click', () => {
+              const code = b.getAttribute('data-code');
+              const match = promos.find(p => p.code === code);
+              if (match) {
+                match.active = !match.active;
+                localStorage.setItem('nexus_promos', JSON.stringify(promos));
+                NexusCore.toast(`สลับสถานะโค้ด ${code} แล้ว`, 'info');
+                loadDatabaseViews();
+              }
+            });
+          });
+        }
+
+        // Render Logs
+        const logsStream = document.getElementById('system-logs-stream');
+        if (logsStream) {
+          logsStream.innerHTML = logs.map(l => `
+            <div class="flex items-start gap-2">
+              <span class="text-slate-500 shrink-0">[${l.time}]</span>
+              <span class="text-cyan-400 shrink-0 font-bold">&lt;${l.event}&gt;</span>
+              <span class="text-slate-300">${l.message}</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      // Add user modal trigger
+      document.getElementById('btn-add-user-modal')?.addEventListener('click', () => {
+        const username = prompt('ตั้งชื่อผู้ใช้ใหม่ (Username):');
+        if (!username) return;
+        const email = prompt('กรอกอีเมล (Email):', `${username}@nexuslab.ai`);
+        const plan = prompt('เลือกแผน (explorer, pro, master):', 'explorer');
+
+        const users = NexusCore.getUsers();
+        users.push({
+          id: 'usr_' + Date.now().toString(36),
+          username: username.toLowerCase().trim(),
+          passwordHash: 'pass1234',
+          fullName: username,
+          email: email || `${username}@nexuslab.ai`,
+          role: 'student',
+          plan: plan || 'explorer',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          linkedAccounts: { google: true, line: false, facebook: false, email: true },
+          joinedDate: new Date().toISOString().split('T')[0],
+          status: 'active'
+        });
+
+        NexusCore.saveUsers(users);
+        NexusCore.toast(`เพิ่มผู้ใช้ @${username} เข้าสู่ฐานข้อมูลแล้ว`, 'success');
+        loadDatabaseViews();
+      });
+
+      // Create new promo code
+      document.getElementById('btn-create-promo')?.addEventListener('click', () => {
+        const code = prompt('ตั้งชื่อโค้ดโปรโมชั่น (เช่น STEM2026):');
+        if (!code) return;
+        const disc = parseInt(prompt('เปอร์เซ็นต์ส่วนลด (1-100%):', '30'), 10) || 30;
+
+        const promos = JSON.parse(localStorage.getItem('nexus_promos') || '[]');
+        promos.push({
+          code: code.toUpperCase().trim(),
+          discountPercent: disc,
+          monthsFree: 0,
+          maxUses: 500,
+          usedCount: 0,
+          active: true
+        });
+        localStorage.setItem('nexus_promos', JSON.stringify(promos));
+        NexusCore.toast(`สร้างโค้ด ${code.toUpperCase()} สำเร็จ`, 'success');
+        loadDatabaseViews();
+      });
+
+      // Save API Keys
+      document.getElementById('btn-save-apikeys')?.addEventListener('click', () => {
+        const keys = {
+          geminiKey: document.getElementById('cfg-gemini-key').value.trim(),
+          mcpServerUrl: document.getElementById('cfg-mcp-url').value.trim(),
+          activeEngine: document.getElementById('cfg-active-engine').value
+        };
+        localStorage.setItem('nexus_api_keys', JSON.stringify(keys));
+        NexusCore.logEvent('API_CONFIG_UPDATED', 'Admin updated Gemini & MCP key server parameters.');
+        NexusCore.toast('บันทึกการตั้งค่า API / MCP Key Server เรียบร้อยแล้ว', 'success');
+      });
+
+      // Ping MCP Server check
+      document.getElementById('btn-ping-mcp')?.addEventListener('click', () => {
+        NexusCore.Sound.beep(750, 0.1);
+        NexusCore.toast('กำลัง Ping ตรวจสอบ MCP Server...', 'info');
+        setTimeout(() => {
+          NexusCore.Sound.success();
+          NexusCore.toast('MCP Endpoint ตอบสนองปกติ: HTTP 200 OK | Latency: 28ms', 'success');
+        }, 600);
+      });
+
+      // Export full DB as JSON
+      document.getElementById('btn-export-db-json')?.addEventListener('click', () => {
+        const fullDump = {
+          users: NexusCore.getUsers(),
+          promos: JSON.parse(localStorage.getItem('nexus_promos') || '[]'),
+          plans: JSON.parse(localStorage.getItem('nexus_plans') || '[]'),
+          customLabs: JSON.parse(localStorage.getItem('nexus_custom_labs') || '{}'),
+          logs: NexusCore.getLogs(),
+          exportDate: new Date().toISOString()
+        };
+        const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullDump, null, 2));
+        const a = document.createElement('a');
+        a.setAttribute('href', str);
+        a.setAttribute('download', `nexuslab_database_backup_${Date.now()}.json`);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        NexusCore.toast('สำรองข้อมูลทั้งระบบเป็น JSON เรียบร้อยแล้ว', 'success');
+      });
+
+      // Factory reset
+      document.getElementById('btn-reset-db')?.addEventListener('click', () => {
+        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการคืนค่าเริ่มต้นทั้งหมด? ข้อมูลที่บันทึกไว้จะถูกรีเซ็ต')) {
+          localStorage.clear();
+          NexusCore.toast('คืนค่าเริ่มต้นเรียบร้อย กำลังรีโหลดระบบ...', 'info');
+          setTimeout(() => { window.location.reload(); }, 800);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

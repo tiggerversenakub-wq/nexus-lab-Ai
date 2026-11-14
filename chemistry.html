@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องแล็บเคมี (Chemistry Workstation) - NexusLab AI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            rose: { 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
+            cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+            amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome, Theme CSS & Chart.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col selection:bg-rose-500 selection:text-white">
+
+  <!-- Nav Header -->
+  <header id="nexus-main-nav" class="sticky top-0 z-50 glass-header"></header>
+
+  <!-- Workstation Tri-Panel Container -->
+  <div class="tri-panel-container flex-1">
+    
+    <!-- LEFT PANEL: Chemistry Modules Navigation & Custom Lab Designer -->
+    <aside class="tri-panel-left glass-panel rounded-2xl p-4 flex flex-col justify-between overflow-y-auto border border-rose-500/20">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-base border border-rose-500/40">
+              <i class="fas fa-flask"></i>
+            </div>
+            <div>
+              <h2 class="text-xs font-black uppercase tracking-wider text-white">Chemistry Lab</h2>
+              <span class="text-[10px] text-rose-400 font-mono">5 Modules Ready</span>
+            </div>
+          </div>
+          <button id="btn-toggle-left" class="lg:hidden text-slate-400 hover:text-white text-xs">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- 5 Chemistry Modules List -->
+        <div class="space-y-1.5" id="chem-modules-list">
+          <button class="chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all bg-rose-500/20 text-rose-300 border border-rose-500/40" data-mod="analytical">
+            <i class="fas fa-vial text-rose-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>เคมีวิเคราะห์ (ไทเทรต & pH)</div>
+              <div class="text-[10px] text-slate-400 font-normal">Analytical Titration Lab</div>
+            </div>
+          </button>
+
+          <button class="chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="organic">
+            <i class="fas fa-atom text-rose-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>เคมีอินทรีย์ & ปฏิกิริยา</div>
+              <div class="text-[10px] text-slate-400 font-normal">Organic Synthesis & Tests</div>
+            </div>
+          </button>
+
+          <button class="chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="inorganic">
+            <i class="fas fa-fire text-rose-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>เคมีอนินทรีย์ & Flame Test</div>
+              <div class="text-[10px] text-slate-400 font-normal">Inorganic Flame Emissions</div>
+            </div>
+          </button>
+
+          <button class="chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="physical">
+            <i class="fas fa-compress-arrows-alt text-rose-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>เคมีเชิงฟิสิกส์ (ก๊าซ PV=nRT)</div>
+              <div class="text-[10px] text-slate-400 font-normal">Physical Thermodynamics</div>
+            </div>
+          </button>
+
+          <button class="chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="biochem">
+            <i class="fas fa-dna text-rose-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>ชีวเคมี (เอนไซม์ Michaelis)</div>
+              <div class="text-[10px] text-slate-400 font-normal">Biochemistry & Enzymes</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Custom Lab Workbench Switcher -->
+        <div class="mt-5 pt-4 border-t border-slate-700/60">
+          <button id="btn-custom-lab-toggle" class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-slate-800/80 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-between transition-all">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-tools text-rose-400"></i>
+              <span>ออกแบบโต๊ะแล็บเคมี</span>
+            </span>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Telemetry CSV Export -->
+      <div class="pt-3 border-t border-slate-700/60 mt-3 text-[11px] text-slate-400">
+        <button id="btn-export-chem-csv" class="w-full py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:text-white flex items-center justify-center gap-1.5 transition-colors">
+          <i class="fas fa-download text-xs text-rose-400"></i>
+          <span>ส่งออกรายงานไทเทรต (CSV)</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER PANEL: Interactive Simulation Workbench -->
+    <main class="tri-panel-center glass-panel rounded-2xl p-4 flex flex-col min-h-0 border border-rose-500/20 relative">
+      
+      <!-- Top Title Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse"></span>
+          <h1 id="active-sim-title" class="font-bold text-white text-sm">เคมีวิเคราะห์ (Analytical Titration Lab)</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-reset-chem" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-[11px] flex items-center gap-1">
+            <i class="fas fa-redo-alt text-[10px]"></i> รีเซ็ต
+          </button>
+          <button id="btn-toggle-tutor" class="lg:hidden px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] flex items-center gap-1">
+            <i class="fas fa-brain text-[10px]"></i> AI Tutor
+          </button>
+        </div>
+      </div>
+
+      <!-- SIMULATION VIEWPORT CONTAINER -->
+      <div class="flex-1 my-3 rounded-xl overflow-hidden relative flex flex-col justify-between bg-slate-950 border border-slate-800 min-h-[360px]">
+        
+        <!-- MODULE 1: Titration Viewport (Default) -->
+        <div id="sim-view-analytical" class="sim-module-view flex-1 flex flex-col lg:flex-row p-4 gap-4">
+          <!-- Buret & Flask Apparatus Canvas -->
+          <div class="flex-1 flex flex-col items-center justify-center relative bg-slate-900/40 rounded-xl border border-slate-800 p-4">
+            <canvas id="titration-canvas" width="280" height="300" class="max-w-full"></canvas>
+            
+            <div class="mt-2 flex items-center gap-3 text-xs">
+              <span class="text-slate-400">ปริมาตร NaOH ที่หยด: <strong id="titrant-vol-label" class="text-cyan-300 font-mono">0.0 mL</strong></span>
+              <span class="text-slate-400">ค่า pH ปัจจุบัน: <strong id="titrant-ph-label" class="text-rose-400 font-mono text-sm">1.00</strong></span>
+            </div>
+          </div>
+
+          <!-- Titration Controls & Live Chart -->
+          <div class="w-full lg:w-96 flex flex-col justify-between space-y-3 text-xs">
+            <!-- Real-time pH Titration Curve -->
+            <div class="h-44 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 relative">
+              <canvas id="titration-chart"></canvas>
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2.5">
+              <div>
+                <label class="block font-semibold text-slate-300 mb-1">ความเร็วการหยดสาร (Drop Rate)</label>
+                <input type="range" id="titration-speed" min="0" max="5" value="0" class="w-full accent-rose-500">
+                <div class="flex justify-between text-[10px] text-slate-500 mt-0.5">
+                  <span>หยุด (Stop)</span>
+                  <span>หยดช้า (Slow)</span>
+                  <span>หยดเร็ว (Fast)</span>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button id="btn-drop-single" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 text-xs">
+                  <i class="fas fa-tint text-cyan-400 mr-1"></i> หยด 0.5 mL
+                </button>
+                <button id="btn-titration-auto" class="flex-1 py-1.5 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-lg text-xs shadow-md">
+                  <i class="fas fa-play mr-1"></i> เริ่มปล่อยหยด
+                </button>
+              </div>
+
+              <div class="p-2 rounded bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
+                <div>อินดิเคเตอร์: <strong>Phenolphthalein</strong> (ช่วงเปลี่ยนสี pH 8.2 - 10.0)</div>
+                <div class="text-emerald-400 text-[10px] mt-0.5" id="titration-status-msg">● สารละลายใส ไร้สี (กรดแก่ HCl 0.1 M)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 2: Organic Chemistry Viewport -->
+        <div id="sim-view-organic" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between overflow-y-auto">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <!-- Test 1: Baeyer's Test -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto mb-2 text-base">
+                  <i class="fas fa-vial"></i>
+                </div>
+                <h4 class="font-bold text-white text-xs mb-1">Baeyer's Test (KMnO₄)</h4>
+                <p class="text-[11px] text-slate-400 mb-3">ทดสอบพันธะคู่/พันธะสาม (Alkene/Alkyne)</p>
+                <div id="baeyer-tube" class="w-12 h-24 mx-auto rounded-b-full bg-purple-700 border-2 border-slate-600 shadow-inner mb-3 transition-colors duration-500"></div>
+              </div>
+              <button id="btn-run-baeyer" class="w-full py-1.5 bg-purple-600/30 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 rounded-lg text-xs font-semibold">
+                เติม 1-Hexene
+              </button>
+            </div>
+
+            <!-- Test 2: Tollens' Silver Mirror Test -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-slate-500/20 text-slate-300 flex items-center justify-center mx-auto mb-2 text-base">
+                  <i class="fas fa-magic"></i>
+                </div>
+                <h4 class="font-bold text-white text-xs mb-1">Tollens' Silver Mirror</h4>
+                <p class="text-[11px] text-slate-400 mb-3">แยกแอลดีไฮด์ (Aldehyde) ออกจากคีโตน</p>
+                <div id="tollens-tube" class="w-12 h-24 mx-auto rounded-b-full bg-slate-800 border-2 border-slate-600 shadow-inner mb-3 transition-all duration-700"></div>
+              </div>
+              <button id="btn-run-tollens" class="w-full py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-500 rounded-lg text-xs font-semibold">
+                เติม Formaldehyde
+              </button>
+            </div>
+
+            <!-- Test 3: Bromine Water Test -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center flex flex-col justify-between">
+              <div>
+                <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-2 text-base">
+                  <i class="fas fa-tint"></i>
+                </div>
+                <h4 class="font-bold text-white text-xs mb-1">Bromine Water (Br₂)</h4>
+                <p class="text-[11px] text-slate-400 mb-3">การฟอกจางสีของโบรมีนในที่มืดและที่สว่าง</p>
+                <div id="bromine-tube" class="w-12 h-24 mx-auto rounded-b-full bg-amber-700 border-2 border-slate-600 shadow-inner mb-3 transition-colors duration-500"></div>
+              </div>
+              <button id="btn-run-bromine" class="w-full py-1.5 bg-amber-600/30 hover:bg-amber-600/40 text-amber-200 border border-amber-500/40 rounded-lg text-xs font-semibold">
+                ฟอกจางสี (Decolorize)
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs text-slate-300">
+            <strong>สรุปผลทางเคมีอินทรีย์:</strong> พันธะไม่อิ่มตัว (Alkene) เกิดปฏิกิริยาการเติม (Addition Reaction) ส่งผลให้สารละลายโบรมีนและด่างทับทิมฟอกจางสีทันทีในที่มืด ขณะที่แอลเคนต้องใช้แสง UV ในการกระตุ้นปฏิกิริยาการแทนที่ (Substitution)
+          </div>
+        </div>
+
+        <!-- MODULE 3: Inorganic Flame Test Viewport -->
+        <div id="sim-view-inorganic" class="sim-module-view flex-1 hidden p-4 flex flex-col lg:flex-row gap-4 items-center justify-center">
+          <!-- Bunsen Burner Flame Canvas -->
+          <div class="relative flex flex-col items-center justify-center">
+            <div class="w-64 h-72 sm:w-80 sm:h-80 bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden flex items-center justify-center">
+              <canvas id="flame-canvas" width="320" height="320"></canvas>
+              <div class="absolute bottom-2 text-center text-[10px] text-slate-500 font-mono">BUNSEN BURNER 1300°C</div>
+            </div>
+          </div>
+
+          <!-- Metal Ion Selection Palette -->
+          <div class="w-full lg:w-80 bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+            <h4 class="font-bold text-white text-xs">การทดสอบสีเปลวไฟโลหะ (Flame Emission Test)</h4>
+            <p class="text-[11px] text-slate-400">อิเล็กตรอนรับพลังงานความร้อนแล้วกระโดดขึ้นสู่ Excited State เมื่อตกลงมาจะคายโฟตอนแสงตามความยาวคลื่นเฉพาะตัว:</p>
+            
+            <div class="space-y-1.5">
+              <button class="btn-flame-metal w-full p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-400 flex items-center justify-between text-left" data-color="#10b981" data-metal="Copper (Cu²⁺)" data-wave="510 nm (สีเขียวมรกต)">
+                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> ทองแดง Cu²⁺ (Copper)</span>
+                <span class="text-emerald-400 font-mono text-[10px]">510 nm เขียว</span>
+              </button>
+              <button class="btn-flame-metal w-full p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-amber-400 flex items-center justify-between text-left" data-color="#f59e0b" data-metal="Sodium (Na⁺)" data-wave="589 nm (สีเหลืองเข้มสด)">
+                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> โซเดียม Na⁺ (Sodium)</span>
+                <span class="text-amber-400 font-mono text-[10px]">589 nm เหลือง</span>
+              </button>
+              <button class="btn-flame-metal w-full p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-purple-400 flex items-center justify-between text-left" data-color="#c084fc" data-metal="Potassium (K⁺)" data-wave="766 nm (สีม่วงไลแลค)">
+                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-400"></span> โพแทสเซียม K⁺ (Potassium)</span>
+                <span class="text-purple-400 font-mono text-[10px]">766 nm ม่วง</span>
+              </button>
+              <button class="btn-flame-metal w-full p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-rose-400 flex items-center justify-between text-left" data-color="#f43f5e" data-metal="Strontium (Sr²⁺)" data-wave="650 nm (สีแดงเลือดนก)">
+                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500"></span> สตรอนเชียม Sr²⁺ (Strontium)</span>
+                <span class="text-rose-400 font-mono text-[10px]">650 nm แดงสด</span>
+              </button>
+              <button class="btn-flame-metal w-full p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-lime-400 flex items-center justify-between text-left" data-color="#84cc16" data-metal="Barium (Ba²⁺)" data-wave="524 nm (สีเขียวแอปเปิ้ล)">
+                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-lime-400"></span> แบเรียม Ba²⁺ (Barium)</span>
+                <span class="text-lime-400 font-mono text-[10px]">524 nm เขียวอ่อน</span>
+              </button>
+            </div>
+
+            <div class="p-2 rounded bg-slate-950 border border-slate-800 text-[11px]" id="flame-info-display">
+              โลหะที่จุ่มในเปลวไฟ: <strong class="text-cyan-300">เปลวไฟมาตรฐาน (ก๊าซบิวเทน)</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 4: Physical Chemistry Viewport (PV=nRT Gas Chamber) -->
+        <div id="sim-view-physical" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 mb-3">
+            <!-- Piston Gas Chamber Canvas -->
+            <div class="lg:col-span-7 bg-slate-900/60 rounded-xl border border-slate-800 p-3 flex flex-col items-center justify-center relative min-h-[200px]">
+              <canvas id="gas-chamber-canvas" class="w-full h-full"></canvas>
+            </div>
+
+            <!-- Gas Law Gauge Telemetry -->
+            <div class="lg:col-span-5 bg-slate-900/80 rounded-xl border border-slate-800 p-4 space-y-4 text-xs">
+              <div class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fas fa-tachometer-alt text-rose-400"></i> กฎของแก๊สอุดมคติ (PV = nRT)
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-center">
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <div class="text-[10px] text-slate-400">ความดัน (P):</div>
+                  <div class="text-base font-black text-rose-400 font-mono" id="gas-pressure-val">1.00 atm</div>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <div class="text-[10px] text-slate-400">อุณหภูมิ (T):</div>
+                  <div class="text-base font-black text-amber-400 font-mono" id="gas-temp-val">298 K (25°C)</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>ปรับปริมาตรกระบอกสูบ (V):</span>
+                  <span id="gas-vol-label" class="font-mono text-cyan-300">22.4 L</span>
+                </div>
+                <input type="range" id="gas-vol-slider" min="5" max="50" value="22" class="w-full accent-cyan-400">
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>ปรับอุณหภูมิความร้อน (T):</span>
+                  <span id="gas-temp-label" class="font-mono text-amber-300">298 K</span>
+                </div>
+                <input type="range" id="gas-temp-slider" min="150" max="600" value="298" class="w-full accent-amber-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 5: Biochemistry Michaelis-Menten Viewport -->
+        <div id="sim-view-biochem" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex-1 flex flex-col mb-3">
+            <div class="flex justify-between items-center mb-2 text-xs">
+              <span class="font-bold text-white flex items-center gap-2">
+                <i class="fas fa-chart-area text-rose-400"></i> จลนพลศาสตร์เอนไซม์ (Michaelis-Menten Kinetics: v = Vmax[S] / (Km + [S]))
+              </span>
+              <span class="text-cyan-400 font-mono text-[11px]" id="biochem-rate-label">Vmax = 100 μmol/s, Km = 20 mM</span>
+            </div>
+            <div class="flex-1 min-h-[180px] relative">
+              <canvas id="enzyme-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ชนิดของตัวยับยั้งเอนไซม์ (Inhibitor Type):</span>
+              <div class="flex gap-2 mt-2">
+                <button class="btn-inhibitor flex-1 py-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[11px] font-bold" data-mode="none">ไม่มีสารยับยั้ง</button>
+                <button class="btn-inhibitor flex-1 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[11px]" data-mode="competitive">แบบแย่ง (Competitive)</button>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ความเข้มข้นของซับสเตรต [S] (Substrate):</span>
+              <input type="range" id="substrate-slider" min="5" max="100" value="30" class="w-full accent-rose-500 mt-1">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Telemetry Bottom Bar -->
+      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-2 truncate">
+          <i class="fas fa-terminal text-rose-400"></i>
+          <span id="chem-telemetry-text">ความดันไอคงที่ 1 atm | เซ็นเซอร์ pH พร้อมทำงาน | Fume Hood Airflow: 100 fpm</span>
+        </div>
+        <span class="text-rose-400 font-mono font-bold shrink-0">CHEM-STABLE</span>
+      </div>
+
+      <!-- OVERLAY: Custom Lab Designer Modal ("ออกแบบแล็บเคมีเป็นตัวเองได้") -->
+      <div id="custom-lab-workbench-modal" class="hidden absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between rounded-2xl border border-rose-500/40">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-tools text-rose-400 text-lg"></i>
+              <div>
+                <h3 class="text-sm font-bold text-white">ออกแบบห้องปฏิบัติการเคมี (Custom Chemistry Lab Designer)</h3>
+                <p class="text-[11px] text-slate-400">เลือกจัดวางตู้ดูดควัน บิวเรตต์ และชั้นวางสารเคมีส่วนตัว</p>
+              </div>
+            </div>
+            <button id="btn-close-custom-lab" class="p-1.5 text-slate-400 hover:text-white">&times;</button>
+          </div>
+
+          <div class="mt-4 space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อห้องแล็บเคมีของคุณ</label>
+              <input type="text" id="custom-lab-name-input" value="ห้องแล็บสังเคราะห์สารอินทรีย์นาโน (Organic Synthesis Hub)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-rose-400">
+            </div>
+
+            <div>
+              <span class="block text-xs font-semibold text-slate-300 mb-2">คลิกเพื่อเพิ่มอุปกรณ์ลงโต๊ะแล็บเคมี:</span>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button class="btn-add-chem-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 border border-slate-700" data-item="Fume Hood 100 fpm">
+                  <i class="fas fa-wind text-rose-400 mr-1"></i> Fume Hood 100 fpm
+                </button>
+                <button class="btn-add-chem-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500/20 text-slate-300 border border-slate-700" data-item="Precision Buret Stand">
+                  <i class="fas fa-vial text-cyan-400 mr-1"></i> Precision Buret Stand
+                </button>
+                <button class="btn-add-chem-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-300 border border-slate-700" data-item="Magnetic Stirrer & Heater">
+                  <i class="fas fa-sync text-amber-400 mr-1"></i> Magnetic Stirrer & Heater
+                </button>
+                <button class="btn-add-chem-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-500/20 text-slate-300 border border-slate-700" data-item="UV-Vis Spectrophotometer">
+                  <i class="fas fa-wave-square text-purple-400 mr-1"></i> UV-Vis Spectrophotometer
+                </button>
+                <button class="btn-add-chem-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 border border-slate-700" data-item="Safety Acid Spill Kit">
+                  <i class="fas fa-shield-alt text-emerald-400 mr-1"></i> Safety Acid Spill Kit
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-xs font-semibold text-slate-300 mb-2">ผังโต๊ะปฏิบัติการเคมีปัจจุบัน:</span>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="custom-chem-bench-display"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex justify-end gap-2">
+          <button id="btn-save-custom-chem-lab" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-500 text-white hover:bg-rose-400 transition-colors shadow-lg">
+            <i class="fas fa-save mr-1.5"></i> บันทึกผังห้องแล็บเคมี
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT PANEL: Universal AI Tutor -->
+    <aside id="chemistry-ai-container" class="tri-panel-right flex flex-col min-h-0"></aside>
+
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav id="nexus-mobile-nav"></nav>
+
+  <!-- Scripts -->
+  <script src="js/nexus-core.js"></script>
+  <script src="js/ai-tutor.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      NexusCore.renderNavbar('chemistry');
+      NexusCore.renderMobileBottomNav('chem');
+
+      NexusAITutor.init('chemistry-ai-container', {
+        discipline: 'chemistry',
+        topic: 'เคมีวิเคราะห์ (Analytical Titration)'
+      });
+
+      // Module Switcher
+      const modButtons = document.querySelectorAll('.chem-mod-btn');
+      const simViews = {
+        analytical: document.getElementById('sim-view-analytical'),
+        organic: document.getElementById('sim-view-organic'),
+        inorganic: document.getElementById('sim-view-inorganic'),
+        physical: document.getElementById('sim-view-physical'),
+        biochem: document.getElementById('sim-view-biochem')
+      };
+
+      const titleMap = {
+        analytical: 'เคมีวิเคราะห์ (Analytical Titration Lab)',
+        organic: 'เคมีอินทรีย์ & ปฏิกิริยา (Organic Synthesis & Tests)',
+        inorganic: 'เคมีอนินทรีย์ & Flame Test (Inorganic Flame Emissions)',
+        physical: 'เคมีเชิงฟิสิกส์ (Physical Thermodynamics PV=nRT)',
+        biochem: 'ชีวเคมี (Biochemistry & Enzymes Michaelis-Menten)'
+      };
+
+      modButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mod = btn.getAttribute('data-mod');
+          NexusCore.Sound.click();
+
+          modButtons.forEach(b => {
+            b.className = 'chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60';
+          });
+          btn.className = 'chem-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all bg-rose-500/20 text-rose-300 border border-rose-500/40';
+
+          Object.keys(simViews).forEach(k => {
+            if (simViews[k]) simViews[k].classList.add('hidden');
+          });
+          if (simViews[mod]) {
+            simViews[mod].classList.remove('hidden');
+          }
+
+          document.getElementById('active-sim-title').textContent = titleMap[mod];
+          NexusAITutor.setContext('chemistry', titleMap[mod]);
+
+          if (mod === 'inorganic') startFlameAnimation();
+          if (mod === 'physical') startGasAnimation();
+          if (mod === 'biochem') initEnzymeChart();
+        });
+      });
+
+      // --- SIMULATION 1: TITRATION LAB & pH CURVE ---
+      const titrCanvas = document.getElementById('titration-canvas');
+      const tctx = titrCanvas ? titrCanvas.getContext('2d') : null;
+      let titrantVol = 0; // mL
+      let currentPH = 1.0;
+      let titrInterval = null;
+      let titrChart = null;
+
+      // Titration Chart setup
+      const titrChartCtx = document.getElementById('titration-chart')?.getContext('2d');
+      if (titrChartCtx) {
+        titrChart = new Chart(titrChartCtx, {
+          type: 'line',
+          data: {
+            labels: [0],
+            datasets: [{
+              label: 'กราฟการไทเทรต pH (0.1M HCl + 0.1M NaOH)',
+              data: [1.0],
+              borderColor: '#f43f5e',
+              backgroundColor: 'rgba(244, 63, 94, 0.15)',
+              tension: 0.2,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { title: { display: true, text: 'ปริมาตร NaOH (mL)', color: '#64748b', font: { size: 9 } }, ticks: { color: '#64748b' } },
+              y: { min: 0, max: 14, title: { display: true, text: 'pH', color: '#64748b', font: { size: 9 } }, ticks: { color: '#64748b' } }
+            },
+            plugins: {
+              legend: { labels: { color: '#cbd5e1', font: { size: 9 } } }
+            }
+          }
+        });
+      }
+
+      function calcPH(vol) {
+        // Equivalence point at 25.0 mL
+        if (vol < 24.5) {
+          return 1.0 + (vol / 25.0) * 1.5;
+        } else if (vol >= 24.5 && vol < 25.5) {
+          // Sharp inflection point
+          return 7.0 + (vol - 25.0) * 4.0;
+        } else {
+          return Math.min(13.5, 11.0 + Math.log10(vol - 24.5));
+        }
+      }
+
+      function drawTitrationApparatus() {
+        if (!tctx) return;
+        const w = titrCanvas.width;
+        const h = titrCanvas.height;
+        tctx.clearRect(0, 0, w, h);
+
+        // Buret tube
+        tctx.strokeStyle = '#94a3b8';
+        tctx.lineWidth = 2;
+        tctx.strokeRect(w/2 - 8, 20, 16, 150);
+
+        // Buret liquid (clear NaOH)
+        const buretFillH = Math.max(0, 140 - (titrantVol / 50) * 140);
+        tctx.fillStyle = 'rgba(186, 230, 253, 0.5)';
+        tctx.fillRect(w/2 - 7, 20 + (140 - buretFillH), 14, buretFillH);
+
+        // Stopcock
+        tctx.fillStyle = '#f59e0b';
+        tctx.fillRect(w/2 - 14, 165, 28, 6);
+
+        // Buret tip
+        tctx.strokeStyle = '#94a3b8';
+        tctx.beginPath();
+        tctx.moveTo(w/2 - 4, 171);
+        tctx.lineTo(w/2, 190);
+        tctx.lineTo(w/2 + 4, 171);
+        tctx.stroke();
+
+        // Droplet
+        if (titrInterval || titrantVol > 0) {
+          tctx.fillStyle = '#38bdf8';
+          tctx.beginPath();
+          tctx.arc(w/2, 195, 2.5, 0, Math.PI * 2);
+          tctx.fill();
+        }
+
+        // Erlenmeyer Flask bottom
+        tctx.strokeStyle = '#cbd5e1';
+        tctx.lineWidth = 2.5;
+        tctx.beginPath();
+        tctx.moveTo(w/2 - 15, 210);
+        tctx.lineTo(w/2 - 45, 280);
+        tctx.lineTo(w/2 + 45, 280);
+        tctx.lineTo(w/2 + 15, 210);
+        tctx.closePath();
+        tctx.stroke();
+
+        // Liquid in Flask (Phenolphthalein color change!)
+        // Under pH 8.2: clear; Over pH 8.2: pink to magenta
+        let liquidColor = 'rgba(224, 242, 254, 0.4)';
+        if (currentPH >= 8.2) {
+          const pinkIntensity = Math.min(1, (currentPH - 8.2) / 3);
+          liquidColor = `rgba(244, 63, 94, ${0.3 + pinkIntensity * 0.6})`;
+        }
+
+        tctx.fillStyle = liquidColor;
+        tctx.beginPath();
+        tctx.moveTo(w/2 - 30, 245);
+        tctx.lineTo(w/2 - 43, 278);
+        tctx.lineTo(w/2 + 43, 278);
+        tctx.lineTo(w/2 + 30, 245);
+        tctx.closePath();
+        tctx.fill();
+      }
+
+      drawTitrationApparatus();
+
+      function addTitrant(amount = 0.5) {
+        titrantVol = Math.min(50, titrantVol + amount);
+        currentPH = calcPH(titrantVol);
+
+        document.getElementById('titrant-vol-label').textContent = `${titrantVol.toFixed(1)} mL`;
+        document.getElementById('titrant-ph-label').textContent = currentPH.toFixed(2);
+
+        const statusMsg = document.getElementById('titration-status-msg');
+        if (currentPH >= 8.2) {
+          statusMsg.className = 'text-rose-400 font-bold text-[10px] mt-0.5';
+          statusMsg.textContent = '● จุดยุติ (End Point): สารเปลี่ยนเป็นสีชมพูระเรื่อแล้ว!';
+        } else {
+          statusMsg.className = 'text-emerald-400 text-[10px] mt-0.5';
+          statusMsg.textContent = '● สารละลายใส ไร้สี (กรดแก่ HCl 0.1 M)';
+        }
+
+        // Update chart
+        if (titrChart) {
+          titrChart.data.labels.push(titrantVol.toFixed(1));
+          titrChart.data.datasets[0].data.push(currentPH.toFixed(2));
+          if (titrChart.data.labels.length > 35) {
+            titrChart.data.labels.shift();
+            titrChart.data.datasets[0].data.shift();
+          }
+          titrChart.update();
+        }
+
+        drawTitrationApparatus();
+        NexusCore.Sound.bubble();
+      }
+
+      document.getElementById('btn-drop-single')?.addEventListener('click', () => {
+        addTitrant(0.5);
+      });
+
+      const autoBtn = document.getElementById('btn-titration-auto');
+      autoBtn?.addEventListener('click', () => {
+        if (titrInterval) {
+          clearInterval(titrInterval);
+          titrInterval = null;
+          autoBtn.innerHTML = '<i class="fas fa-play mr-1"></i> เริ่มปล่อยหยด';
+        } else {
+          autoBtn.innerHTML = '<i class="fas fa-pause mr-1"></i> พักการหยด';
+          titrInterval = setInterval(() => {
+            if (titrantVol >= 50) {
+              clearInterval(titrInterval);
+              titrInterval = null;
+              autoBtn.innerHTML = '<i class="fas fa-play mr-1"></i> เริ่มปล่อยหยด';
+              return;
+            }
+            addTitrant(0.5);
+          }, 350);
+        }
+      });
+
+      // --- SIMULATION 2: ORGANIC TESTS ---
+      document.getElementById('btn-run-baeyer')?.addEventListener('click', () => {
+        const tube = document.getElementById('baeyer-tube');
+        tube.style.backgroundColor = '#78350f'; // Decolorized to brown MnO2 precipitate
+        NexusCore.Sound.bubble();
+        NexusCore.toast('เติม 1-Hexene: สารละลายด่างทับทิมฟอกจางสี เกิดตะกอนสีน้ำตาลของ MnO₂', 'success');
+      });
+
+      document.getElementById('btn-run-tollens')?.addEventListener('click', () => {
+        const tube = document.getElementById('tollens-tube');
+        tube.style.background = 'linear-gradient(to right, #94a3b8, #f8fafc, #64748b)'; // Silver mirror
+        NexusCore.Sound.success();
+        NexusCore.toast('เติม Formaldehyde: เกิดคราบโลหะเงินเคลือบหลอดทดลอง (Silver Mirror)', 'success');
+      });
+
+      document.getElementById('btn-run-bromine')?.addEventListener('click', () => {
+        const tube = document.getElementById('bromine-tube');
+        tube.style.backgroundColor = 'rgba(224, 242, 254, 0.4)'; // Clear
+        NexusCore.Sound.bubble();
+        NexusCore.toast('ฟอกจางสีของโบรมีน (Decolorization) สำเร็จทันทีในที่มืด', 'success');
+      });
+
+      // --- SIMULATION 3: INORGANIC FLAME TEST PARTICLES ---
+      const flameCanvas = document.getElementById('flame-canvas');
+      let flameCtx = flameCanvas ? flameCanvas.getContext('2d') : null;
+      let activeFlameColor = '#38bdf8'; // Default blue flame
+      let flameAnimId = null;
+
+      function startFlameAnimation() {
+        if (flameAnimId) cancelAnimationFrame(flameAnimId);
+        function loop() {
+          const w = flameCanvas.width;
+          const h = flameCanvas.height;
+          flameCtx.fillStyle = 'rgba(3, 7, 18, 0.2)';
+          flameCtx.fillRect(0, 0, w, h);
+
+          // Bunsen Burner Base
+          flameCtx.fillStyle = '#64748b';
+          flameCtx.fillRect(w/2 - 12, h - 60, 24, 60);
+
+          // Flame Core
+          const time = Date.now() * 0.005;
+          const flameH = 110 + Math.sin(time * 3) * 15;
+          const flameW = 35 + Math.cos(time * 4) * 6;
+
+          const grad = flameCtx.createRadialGradient(w/2, h - 60 - flameH/2, 5, w/2, h - 60 - flameH/2, flameW);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.3, activeFlameColor);
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+          flameCtx.fillStyle = grad;
+          flameCtx.beginPath();
+          flameCtx.ellipse(w/2 + Math.sin(time * 2) * 4, h - 60 - flameH/2, flameW, flameH/2, 0, 0, Math.PI * 2);
+          flameCtx.fill();
+
+          flameAnimId = requestAnimationFrame(loop);
+        }
+        loop();
+      }
+
+      document.querySelectorAll('.btn-flame-metal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeFlameColor = btn.getAttribute('data-color');
+          const metal = btn.getAttribute('data-metal');
+          const wave = btn.getAttribute('data-wave');
+          document.getElementById('flame-info-display').innerHTML = `โลหะที่จุ่มในเปลวไฟ: <strong style="color:${activeFlameColor}">${metal}</strong> (${wave})`;
+          NexusCore.Sound.laser();
+        });
+      });
+
+      // --- SIMULATION 4: PHYSICAL PV=nRT GAS CHAMBER ---
+      const gasCanvas = document.getElementById('gas-chamber-canvas');
+      let gasCtx = gasCanvas ? gasCanvas.getContext('2d') : null;
+      let gasVolume = 22.4;
+      let gasTemp = 298;
+      let gasParticles = [];
+
+      for (let i = 0; i < 40; i++) {
+        gasParticles.push({
+          x: Math.random() * 200 + 40,
+          y: Math.random() * 100 + 40,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3
+        });
+      }
+
+      function startGasAnimation() {
+        const w = gasCanvas.width = gasCanvas.parentElement.clientWidth;
+        const h = gasCanvas.height = gasCanvas.parentElement.clientHeight;
+
+        function loop() {
+          gasCtx.clearRect(0, 0, w, h);
+
+          // Piston walls
+          const pistonWidth = Math.min(340, w - 40);
+          const pistonHeight = 140;
+          const pistonX = (w - pistonWidth) / 2;
+          const pistonY = (h - pistonHeight) / 2;
+
+          gasCtx.strokeStyle = '#64748b';
+          gasCtx.lineWidth = 3;
+          gasCtx.strokeRect(pistonX, pistonY, pistonWidth, pistonHeight);
+
+          // Piston head position controlled by volume
+          const pistonHeadX = pistonX + (gasVolume / 50) * (pistonWidth - 40) + 30;
+          gasCtx.fillStyle = '#0284c7';
+          gasCtx.fillRect(pistonHeadX, pistonY + 2, 12, pistonHeight - 4);
+
+          // Gas particles
+          const speedFactor = Math.sqrt(gasTemp / 298);
+          gasCtx.fillStyle = '#f43f5e';
+          gasParticles.forEach(p => {
+            p.x += p.vx * speedFactor;
+            p.y += p.vy * speedFactor;
+
+            if (p.x < pistonX + 6 || p.x > pistonHeadX - 6) p.vx *= -1;
+            if (p.y < pistonY + 6 || p.y > pistonY + pistonHeight - 6) p.vy *= -1;
+
+            gasCtx.beginPath();
+            gasCtx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+            gasCtx.fill();
+          });
+
+          requestAnimationFrame(loop);
+        }
+        loop();
+      }
+
+      document.getElementById('gas-vol-slider')?.addEventListener('input', (e) => {
+        gasVolume = parseFloat(e.target.value);
+        document.getElementById('gas-vol-label').textContent = `${gasVolume.toFixed(1)} L`;
+        updateGasPressure();
+      });
+
+      document.getElementById('gas-temp-slider')?.addEventListener('input', (e) => {
+        gasTemp = parseInt(e.target.value, 10);
+        document.getElementById('gas-temp-label').textContent = `${gasTemp} K`;
+        document.getElementById('gas-temp-val').textContent = `${gasTemp} K (${gasTemp - 273}°C)`;
+        updateGasPressure();
+      });
+
+      function updateGasPressure() {
+        // P = (nRT) / V where n = 1 mole, R = 0.0821
+        const pressure = (1 * 0.0821 * gasTemp) / gasVolume;
+        document.getElementById('gas-pressure-val').textContent = `${pressure.toFixed(2)} atm`;
+      }
+
+      // --- SIMULATION 5: BIOCHEM ENZYME CHART ---
+      let enzChart = null;
+      function initEnzymeChart() {
+        const ctx = document.getElementById('enzyme-chart')?.getContext('2d');
+        if (!ctx || enzChart) return;
+
+        const sVals = [0, 5, 10, 20, 30, 40, 60, 80, 100];
+        const normalRate = sVals.map(s => (100 * s) / (20 + s));
+        const inhibRate = sVals.map(s => (100 * s) / (50 + s)); // Km increases to 50
+
+        enzChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: sVals.map(s => `${s} mM`),
+            datasets: [
+              {
+                label: 'ปกติ (Uninhibited, Km=20)',
+                data: normalRate,
+                borderColor: '#f43f5e',
+                backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                tension: 0.3,
+                fill: true
+              },
+              {
+                label: 'มีตัวยับยั้งแบบแย่ง (Competitive, Km=50)',
+                data: inhibRate,
+                borderColor: '#38bdf8',
+                borderDash: [5, 5],
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { title: { display: true, text: 'ความเข้มข้นสารตั้งต้น [S] (mM)', color: '#64748b', font: { size: 9 } }, ticks: { color: '#64748b' } },
+              y: { title: { display: true, text: 'อัตราเร็วปฏิกิริยา v (μmol/s)', color: '#64748b', font: { size: 9 } }, ticks: { color: '#64748b' } }
+            },
+            plugins: {
+              legend: { labels: { color: '#cbd5e1', font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      // Custom Chemistry Lab Designer
+      const customModal = document.getElementById('custom-lab-workbench-modal');
+      const customToggle = document.getElementById('btn-custom-lab-toggle');
+      const customClose = document.getElementById('btn-close-custom-lab');
+      const customChemBenchDisplay = document.getElementById('custom-chem-bench-display');
+
+      let savedChemLab = NexusCore.getCustomLab('chemistry') || {
+        name: 'ห้องแล็บสังเคราะห์สารอินทรีย์นาโน (Organic Synthesis Hub)',
+        colorTheme: '#f43f5e',
+        equipment: ['Fume Hood 100 fpm', 'Precision Buret Stand', 'Magnetic Stirrer & Heater', 'UV-Vis Spectrophotometer']
+      };
+
+      function renderCustomChemSlots() {
+        if (!customChemBenchDisplay) return;
+        customChemBenchDisplay.innerHTML = savedChemLab.equipment.map((item, idx) => `
+          <div class="lab-bench-slot p-3 bg-slate-900/60 rounded-xl border border-rose-500/30 flex flex-col items-center justify-between text-center relative group">
+            <span class="text-[10px] text-slate-500 font-mono">สล็อต #${idx + 1}</span>
+            <div class="my-1.5 font-bold text-white text-xs">${item}</div>
+            <button class="btn-remove-chem-slot text-rose-400 hover:text-rose-300 text-[10px]" data-idx="${idx}">
+              <i class="fas fa-trash-alt mr-1"></i> ลบออก
+            </button>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.btn-remove-chem-slot').forEach(b => {
+          b.addEventListener('click', () => {
+            const idx = parseInt(b.getAttribute('data-idx'), 10);
+            savedChemLab.equipment.splice(idx, 1);
+            renderCustomChemSlots();
+            NexusCore.Sound.click();
+          });
+        });
+      }
+
+      customToggle?.addEventListener('click', () => {
+        customModal.classList.remove('hidden');
+        renderCustomChemSlots();
+        NexusCore.Sound.click();
+      });
+
+      customClose?.addEventListener('click', () => {
+        customModal.classList.add('hidden');
+        NexusCore.Sound.click();
+      });
+
+      document.querySelectorAll('.btn-add-chem-equip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.getAttribute('data-item');
+          if (savedChemLab.equipment.length >= 8) {
+            NexusCore.toast('โต๊ะแล็บเคมีเต็มแล้ว (สูงสุด 8 อุปกรณ์)', 'warning');
+            return;
+          }
+          savedChemLab.equipment.push(item);
+          renderCustomChemSlots();
+          NexusCore.Sound.bubble();
+        });
+      });
+
+      document.getElementById('btn-save-custom-chem-lab')?.addEventListener('click', () => {
+        savedChemLab.name = document.getElementById('custom-lab-name-input').value.trim() || 'My Custom Chemistry Lab';
+        NexusCore.saveCustomLab('chemistry', savedChemLab);
+        customModal.classList.add('hidden');
+      });
+
+      // CSV Export
+      document.getElementById('btn-export-chem-csv')?.addEventListener('click', () => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+          + "Volume_NaOH_mL,pH,Status\n"
+          + `${titrantVol.toFixed(1)},${currentPH.toFixed(2)},${currentPH >= 8.2 ? 'EndPoint' : 'Acidic'}\n`;
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "nexuslab_titration_report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        NexusCore.toast('ส่งออกรายงานผลการทดลองเคมีสำเร็จ', 'success');
+      });
+    });
+  </script>
+</body>
+</html>

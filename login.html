@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ - NexusLab AI Workstation</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+            purple: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome & Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+  <!-- Nav Header -->
+  <header id="nexus-main-nav" class="sticky top-0 z-50 glass-header"></header>
+
+  <main class="flex-1 flex items-center justify-center p-4 sm:p-6 my-8">
+    <div class="max-w-md w-full glass-panel rounded-3xl p-6 sm:p-8 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+      <!-- Glow ambient -->
+      <div class="absolute -top-12 -right-12 w-40 h-40 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Header Icon & Title -->
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-cyan-500/30">
+          <i class="fas fa-atom text-white text-2xl"></i>
+        </div>
+        <h2 class="text-2xl font-black text-white">NexusLab Portal</h2>
+        <p class="text-xs text-slate-400 mt-1">เข้าถึงห้องปฏิบัติการวิทยาศาสตร์เสมือนจริง 2D/3D</p>
+      </div>
+
+      <!-- Auth Switcher Tabs (Sign In / Register) -->
+      <div class="grid grid-cols-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800 mb-6 text-xs font-semibold">
+        <button id="tab-login" class="py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold transition-all shadow-sm">
+          เข้าสู่ระบบ (Sign In)
+        </button>
+        <button id="tab-register" class="py-2 rounded-lg text-slate-400 hover:text-white transition-all">
+          สมัครสมาชิกใหม่ (Sign Up)
+        </button>
+      </div>
+
+      <!-- Quick Demo Account Quick-Fill Bar (For Testing Every Role!) -->
+      <div class="mb-5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px]">
+        <div class="text-slate-400 mb-1.5 flex items-center justify-between">
+          <span><i class="fas fa-vial text-cyan-400 mr-1"></i> ทดสอบทุกบัญชี (1-Click Test):</span>
+          <span class="text-emerald-400 font-mono">DEMO READY</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 text-center">
+          <button class="btn-quick-fill px-2 py-1 rounded bg-slate-800 hover:bg-cyan-500/20 hover:text-cyan-300 text-slate-300 font-medium transition-colors" data-u="admin" data-p="admin1234">
+            🔑 Admin
+          </button>
+          <button class="btn-quick-fill px-2 py-1 rounded bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 font-medium transition-colors" data-u="dr_sarah" data-p="pass1234">
+            🔬 Pro User
+          </button>
+          <button class="btn-quick-fill px-2 py-1 rounded bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-300 font-medium transition-colors" data-u="somchai_kvis" data-p="pass1234">
+            🎓 Student
+          </button>
+        </div>
+      </div>
+
+      <!-- FORM 1: LOGIN -->
+      <form id="form-login" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อผู้ใช้ หรือ อีเมล</label>
+          <div class="relative">
+            <i class="fas fa-user absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+            <input type="text" id="login-username" required placeholder="admin หรือ student@nexuslab.ai" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl py-2.5 pl-9 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">รหัสผ่าน (Password)</label>
+          <div class="relative">
+            <i class="fas fa-lock absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+            <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl py-2.5 pl-9 pr-10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors">
+            <button type="button" class="btn-toggle-pwd absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="login-remember" checked class="rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-0">
+            <span>จดจำการเข้าสู่ระบบ</span>
+          </label>
+          <a href="#" id="link-forgot" class="text-cyan-400 hover:underline">ลืมรหัสผ่าน?</a>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 hover:scale-[1.02] transition-all">
+          <i class="fas fa-sign-in-alt mr-1"></i> เข้าสู่ระบบทันที
+        </button>
+      </form>
+
+      <!-- FORM 2: REGISTER (Hidden by default) -->
+      <form id="form-register" class="space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อ-นามสกุล หรือ ฉายา</label>
+          <input type="text" id="reg-fullname" required placeholder="นายกิตติคุณ ศรีวิชัย" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อผู้ใช้ (Username)</label>
+          <input type="text" id="reg-username" required placeholder="kittikun_lab" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">อีเมลติดต่อ (E-mail)</label>
+          <input type="email" id="reg-email" required placeholder="kittikun@school.ac.th" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">รหัสผ่าน (Password)</label>
+          <input type="password" id="reg-password" required placeholder="อย่างน้อย 6 ตัวอักษร" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <!-- Plan selection during register -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">เลือกแผนเริ่มต้น</label>
+          <select id="reg-plan" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-xs text-cyan-300 focus:outline-none focus:border-cyan-400">
+            <option value="explorer">Explorer (ฟรี ตลอดชีพ)</option>
+            <option value="pro" selected>Pro Researcher (฿299/เดือน - ทดลองใช้ฟรี)</option>
+            <option value="master">Lab Master (สำหรับสถาบัน/โรงเรียน)</option>
+          </select>
+        </div>
+
+        <!-- Promo Code in Register -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">โค้ดโปรโมชั่น / ส่วนลด (ถ้ามี)</label>
+          <div class="flex gap-1.5">
+            <input type="text" id="reg-promo" placeholder="เช่น NEXUS2026 หรือ SCIENCEPRO" class="flex-1 uppercase font-mono bg-slate-900/80 border border-slate-700 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+            <button type="button" id="reg-promo-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-cyan-500/20 text-cyan-300 text-xs rounded-xl border border-slate-700">ตรวจ</button>
+          </div>
+          <p id="reg-promo-feedback" class="text-[10px] mt-1 hidden"></p>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-white shadow-lg shadow-emerald-500/25 hover:scale-[1.02] transition-all">
+          <i class="fas fa-user-plus mr-1"></i> ยืนยันการสมัครสมาชิก
+        </button>
+      </form>
+
+      <!-- Social Logins Section -->
+      <div class="mt-6 pt-5 border-t border-slate-800 text-center">
+        <p class="text-[11px] text-slate-400 mb-3">หรือเชื่อมต่อเข้าสู่ระบบด้วย (OAuth)</p>
+        <div class="grid grid-cols-3 gap-2">
+          <!-- Google -->
+          <button class="btn-social-auth flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200 transition-colors" data-provider="google">
+            <i class="fab fa-google text-rose-400"></i>
+            <span>Google</span>
+          </button>
+          <!-- LINE -->
+          <button class="btn-social-auth flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200 transition-colors" data-provider="line">
+            <i class="fab fa-line text-emerald-400"></i>
+            <span>LINE</span>
+          </button>
+          <!-- Facebook -->
+          <button class="btn-social-auth flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs text-slate-200 transition-colors" data-provider="facebook">
+            <i class="fab fa-facebook text-blue-400"></i>
+            <span>Facebook</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer Info -->
+  <footer class="py-4 text-center text-xs text-slate-500">
+    NexusLab AI Security Gate • 256-bit AES Simulated Encryption
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/nexus-core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      NexusCore.renderNavbar('login');
+
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const formLogin = document.getElementById('form-login');
+      const formRegister = document.getElementById('form-register');
+
+      // Toggle Tabs
+      tabLogin.addEventListener('click', () => {
+        tabLogin.className = 'py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold transition-all shadow-sm';
+        tabRegister.className = 'py-2 rounded-lg text-slate-400 hover:text-white transition-all';
+        formLogin.classList.remove('hidden');
+        formRegister.classList.add('hidden');
+        NexusCore.Sound.click();
+      });
+
+      tabRegister.addEventListener('click', () => {
+        tabRegister.className = 'py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold transition-all shadow-sm';
+        tabLogin.className = 'py-2 rounded-lg text-slate-400 hover:text-white transition-all';
+        formRegister.classList.remove('hidden');
+        formLogin.classList.add('hidden');
+        NexusCore.Sound.click();
+      });
+
+      // Show/Hide password toggle
+      document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = btn.previousElementSibling;
+          if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+          } else {
+            input.type = 'password';
+            btn.innerHTML = '<i class="fas fa-eye"></i>';
+          }
+        });
+      });
+
+      // Quick Fill Demo Account
+      document.querySelectorAll('.btn-quick-fill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabLogin.click();
+          document.getElementById('login-username').value = btn.getAttribute('data-u');
+          document.getElementById('login-password').value = btn.getAttribute('data-p');
+          NexusCore.Sound.click();
+          NexusCore.toast(`กรอกข้อมูลบัญชีทดสอบ [${btn.innerText.trim()}] สำเร็จ`, 'info');
+        });
+      });
+
+      // Handle Login Submit
+      formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const u = document.getElementById('login-username').value.trim();
+        const p = document.getElementById('login-password').value;
+
+        const res = NexusCore.login(u, p);
+        if (res.success) {
+          if (window.confetti) {
+            window.confetti({ particleCount: 70, spread: 80 });
+          }
+          setTimeout(() => {
+            if (res.user.role === 'admin') {
+              window.location.href = 'database.html';
+            } else {
+              window.location.href = 'index.html';
+            }
+          }, 800);
+        }
+      });
+
+      // Handle Promo check in register form
+      const promoBtn = document.getElementById('reg-promo-btn');
+      const promoInput = document.getElementById('reg-promo');
+      const promoFeedback = document.getElementById('reg-promo-feedback');
+
+      promoBtn?.addEventListener('click', () => {
+        const val = promoInput.value.trim();
+        const res = NexusCore.verifyPromo(val);
+        promoFeedback.classList.remove('hidden');
+        if (res.valid) {
+          promoFeedback.className = 'text-[10px] mt-1 text-emerald-400 font-bold';
+          promoFeedback.textContent = res.message;
+          NexusCore.Sound.success();
+        } else {
+          promoFeedback.className = 'text-[10px] mt-1 text-rose-400 font-medium';
+          promoFeedback.textContent = res.message;
+          NexusCore.Sound.beep(300, 0.15);
+        }
+      });
+
+      // Handle Register Submit
+      formRegister.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newUser = {
+          fullName: document.getElementById('reg-fullname').value.trim(),
+          username: document.getElementById('reg-username').value.trim(),
+          email: document.getElementById('reg-email').value.trim(),
+          password: document.getElementById('reg-password').value,
+          plan: document.getElementById('reg-plan').value
+        };
+
+        if (newUser.password.length < 6) {
+          NexusCore.toast('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร', 'warning');
+          return;
+        }
+
+        const res = NexusCore.register(newUser);
+        if (res.success) {
+          if (window.confetti) {
+            window.confetti({ particleCount: 100, spread: 100 });
+          }
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 900);
+        }
+      });
+
+      // Social Auth Simulation (Google, LINE, Facebook)
+      document.querySelectorAll('.btn-social-auth').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const provider = btn.getAttribute('data-provider');
+          NexusCore.Sound.click();
+
+          const simulatedUser = {
+            id: 'usr_' + provider + '_' + Date.now().toString(36),
+            username: `${provider}_user_${Math.floor(Math.random() * 899 + 100)}`,
+            passwordHash: 'oauth_token_secure',
+            fullName: `${provider.toUpperCase()} Explorer User`,
+            email: `user@${provider}-oauth.nexuslab.ai`,
+            role: 'student',
+            plan: 'pro', // Free trial on social login
+            avatar: provider === 'google' 
+              ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' 
+              : provider === 'line' 
+              ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150' 
+              : 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+            linkedAccounts: {
+              google: provider === 'google',
+              line: provider === 'line',
+              facebook: provider === 'facebook',
+              email: true
+            },
+            joinedDate: new Date().toISOString().split('T')[0],
+            status: 'active'
+          };
+
+          const users = NexusCore.getUsers();
+          users.push(simulatedUser);
+          NexusCore.saveUsers(users);
+          localStorage.setItem('nexus_current_user', JSON.stringify(simulatedUser));
+          NexusCore.logEvent('AUTH_OAUTH', `Connected through ${provider.toUpperCase()} provider.`);
+          NexusCore.toast(`เชื่อมต่อและเข้าสู่ระบบด้วย ${provider.toUpperCase()} สำเร็จ!`, 'success');
+
+          if (window.confetti) {
+            window.confetti({ particleCount: 60, spread: 60 });
+          }
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 800);
+        });
+      });
+
+      // Forgot Password trigger
+      document.getElementById('link-forgot')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = prompt('กรุณากรอกอีเมลของคุณเพื่อรับลิงก์รีเซ็ตรหัสผ่าน:');
+        if (email) {
+          NexusCore.toast(`ส่งลิงก์รีเซ็ตรหัสผ่านไปยัง ${email} เรียบร้อยแล้ว (จำลองสถานการณ์)`, 'info');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

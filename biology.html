@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องแล็บชีววิทยา (Biology Workstation) - NexusLab AI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+            cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+            purple: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome, Theme CSS & Chart.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- Nav Header -->
+  <header id="nexus-main-nav" class="sticky top-0 z-50 glass-header"></header>
+
+  <!-- Workstation Tri-Panel Container -->
+  <div class="tri-panel-container flex-1">
+    
+    <!-- LEFT PANEL: Module Navigation & Custom Lab Designer Toggle -->
+    <aside class="tri-panel-left glass-panel rounded-2xl p-4 flex flex-col justify-between overflow-y-auto border border-emerald-500/20">
+      <div>
+        <!-- Lab Header -->
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base border border-emerald-500/40">
+              <i class="fas fa-dna"></i>
+            </div>
+            <div>
+              <h2 class="text-xs font-black uppercase tracking-wider text-white">Biology Lab</h2>
+              <span class="text-[10px] text-emerald-400 font-mono">5 Modules Ready</span>
+            </div>
+          </div>
+          <!-- Tablet Drawer Close Button (visible only on tablet) -->
+          <button id="btn-toggle-left" class="lg:hidden text-slate-400 hover:text-white text-xs">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- 5 Biology Modules List -->
+        <div class="space-y-1.5" id="bio-modules-list">
+          <button class="bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" data-mod="microscopy">
+            <i class="fas fa-microscope text-emerald-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>เซลล์ชีววิทยา & กล้องจุลทรรศน์</div>
+              <div class="text-[10px] text-slate-400 font-normal">Cell Biology & Microscopy</div>
+            </div>
+          </button>
+
+          <button class="bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="genetics">
+            <i class="fas fa-dna text-emerald-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>ชีววิทยาโมเลกุล & พันธุศาสตร์</div>
+              <div class="text-[10px] text-slate-400 font-normal">Molecular Biology & Genetics</div>
+            </div>
+          </button>
+
+          <button class="bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="microbio">
+            <i class="fas fa-virus text-emerald-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>จุลชีววิทยา & ภูมิคุ้มกัน</div>
+              <div class="text-[10px] text-slate-400 font-normal">Microbiology & Immunology</div>
+            </div>
+          </button>
+
+          <button class="bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="anatomy">
+            <i class="fas fa-heartbeat text-emerald-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>กายวิภาคศาสตร์ & สรีรวิทยา</div>
+              <div class="text-[10px] text-slate-400 font-normal">Anatomy & Physiology</div>
+            </div>
+          </button>
+
+          <button class="bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="ecology">
+            <i class="fas fa-tree text-emerald-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>นิเวศวิทยา & ชีววิทยาภาคสนาม</div>
+              <div class="text-[10px] text-slate-400 font-normal">Ecology & Field Biology</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Custom Lab Designer Switcher ("ออกแบบแล็บเป็นตัวเองได้") -->
+        <div class="mt-5 pt-4 border-t border-slate-700/60">
+          <button id="btn-custom-lab-toggle" class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-slate-800/80 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center justify-between transition-all">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-tools text-cyan-400"></i>
+              <span>ออกแบบโต๊ะแล็บชีวะ</span>
+            </span>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Telemetry Export -->
+      <div class="pt-3 border-t border-slate-700/60 mt-3 text-[11px] text-slate-400">
+        <button id="btn-export-telemetry" class="w-full py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:text-white flex items-center justify-center gap-1.5 transition-colors">
+          <i class="fas fa-download text-xs text-emerald-400"></i>
+          <span>ส่งออกผลการทดลอง (CSV)</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER PANEL: Interactive 2D/3D Simulation Canvas & Workbench -->
+    <main class="tri-panel-center glass-panel rounded-2xl p-4 flex flex-col min-h-0 border border-emerald-500/20 relative">
+      
+      <!-- Top Lab Header Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <h1 id="active-sim-title" class="font-bold text-white text-sm">เซลล์ชีววิทยา & กล้องจุลทรรศน์ (Cell Biology & Microscopy)</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-reset-sim" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-[11px] flex items-center gap-1">
+            <i class="fas fa-redo-alt text-[10px]"></i> รีเซ็ต
+          </button>
+          <button id="btn-toggle-tutor" class="lg:hidden px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] flex items-center gap-1">
+            <i class="fas fa-brain text-[10px]"></i> AI Tutor
+          </button>
+        </div>
+      </div>
+
+      <!-- SIMULATION VIEWPORT CONTAINER -->
+      <div class="flex-1 my-3 rounded-xl overflow-hidden relative flex flex-col justify-between bg-slate-950 border border-slate-800 min-h-[360px]">
+        
+        <!-- MODULE 1: Microscopy Viewport (Default) -->
+        <div id="sim-view-microscopy" class="sim-module-view flex-1 flex flex-col lg:flex-row relative">
+          <!-- Canvas Circular Viewport -->
+          <div class="flex-1 flex items-center justify-center relative p-4">
+            <div class="w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-slate-700 shadow-2xl relative overflow-hidden bg-black flex items-center justify-center">
+              <canvas id="microscope-canvas" width="320" height="320" class="w-full h-full object-cover"></canvas>
+              <!-- Crosshair Overlay -->
+              <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
+                <div class="w-full h-0.5 bg-emerald-400"></div>
+                <div class="h-full w-0.5 bg-emerald-400 absolute"></div>
+              </div>
+            </div>
+            <!-- Lens Magnification Tag -->
+            <div class="absolute top-4 left-4 px-2.5 py-1 rounded-lg glass-panel text-[11px] font-mono text-emerald-400 border border-emerald-500/30">
+              MAG: <span id="label-mag">400x</span> (Oil Immersion)
+            </div>
+          </div>
+
+          <!-- Controls Sub-panel -->
+          <div class="w-full lg:w-72 bg-slate-900/90 border-t lg:border-t-0 lg:border-l border-slate-800 p-4 space-y-4 text-xs overflow-y-auto">
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1.5">เลือกแผ่นสไลด์ตัวอย่าง (Slide Specimen)</label>
+              <select id="micro-slide-select" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-emerald-300 focus:outline-none focus:border-emerald-400">
+                <option value="onion">หัวหอม (Onion Root Tip - ระยะแบ่งเซลล์)</option>
+                <option value="paramecium">พารามีเซียม (Paramecium with Cilia)</option>
+                <option value="chloroplast">สาหร่ายหางกระรอก (Elodea Chloroplasts)</option>
+                <option value="cheek">เซลล์เยื่อบุกระพุ้งแก้มคน (Human Cheek Cell)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">กำลังขยายเลนส์ใกล้วัตถุ (Objective Lens)</label>
+              <div class="grid grid-cols-4 gap-1">
+                <button class="btn-mag py-1.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px]" data-mag="40">40x</button>
+                <button class="btn-mag py-1.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px]" data-mag="100">100x</button>
+                <button class="btn-mag py-1.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-[11px] font-bold" data-mag="400">400x</button>
+                <button class="btn-mag py-1.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px]" data-mag="1000">1000x</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between font-semibold text-slate-300 mb-1">
+                <span>ปุ่มปรับภาพละเอียด (Fine Focus)</span>
+                <span id="label-focus" class="text-emerald-400 font-mono">100% (คมชัด)</span>
+              </div>
+              <input type="range" id="micro-focus-slider" min="0" max="100" value="95" class="w-full accent-emerald-400">
+            </div>
+
+            <div>
+              <div class="flex justify-between font-semibold text-slate-300 mb-1">
+                <span>ความสว่างแสง (Iris Diaphragm)</span>
+                <span id="label-light" class="text-emerald-400 font-mono">80%</span>
+              </div>
+              <input type="range" id="micro-light-slider" min="20" max="100" value="80" class="w-full accent-emerald-400">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1.5">สีย้อมตัวอย่าง (Staining Dye)</label>
+              <div class="grid grid-cols-3 gap-1.5 text-[10px]">
+                <button class="btn-dye py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" data-dye="none">ไม่ย้อม</button>
+                <button class="btn-dye py-1 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold" data-dye="methylene">Methylene</button>
+                <button class="btn-dye py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40" data-dye="iodine">Iodine</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 2: Molecular Genetics Viewport -->
+        <div id="sim-view-genetics" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between overflow-y-auto">
+          <div class="space-y-4">
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+              <h3 class="font-bold text-white text-xs mb-2 flex items-center gap-2">
+                <i class="fas fa-code text-emerald-400"></i> DNA Transcription & Translation Synthesizer
+              </h3>
+              <p class="text-[11px] text-slate-400 mb-3">พิมพ์สายรหัส DNA แม่แบบ (Template Strand) เพื่อถอดรหัสเป็น mRNA และสายพอลิเพปไทด์ (Amino Acid Chain):</p>
+              
+              <div class="flex gap-2">
+                <input type="text" id="dna-input-seq" value="TACCGGATTCATACT" class="flex-1 uppercase font-mono bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-emerald-300 focus:outline-none focus:border-emerald-400">
+                <button id="btn-transcribe-dna" class="px-4 py-2 bg-emerald-500 text-slate-950 font-bold text-xs rounded-lg hover:bg-emerald-400">
+                  ถอดรหัส (Synthesize)
+                </button>
+              </div>
+
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                <div class="p-3 bg-slate-950/70 rounded-lg border border-slate-800">
+                  <div class="text-[10px] text-slate-500 uppercase">mRNA Codons:</div>
+                  <div id="mrna-output" class="text-cyan-400 font-bold text-sm tracking-widest mt-1">AUG-GCC-UAA-GUA-UGA</div>
+                </div>
+                <div class="p-3 bg-slate-950/70 rounded-lg border border-slate-800">
+                  <div class="text-[10px] text-slate-500 uppercase">Peptide Chain (Amino Acids):</div>
+                  <div id="peptide-output" class="text-purple-300 font-bold text-sm mt-1">Met - Ala - Stop</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Punnett Square -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+              <h3 class="font-bold text-white text-xs mb-2">ตารางพุนเน็ตต์ผสมพันธุ์ (Punnett Square Cross)</h3>
+              <div class="flex items-center gap-3 text-xs mb-3">
+                <span>พ่อ (Parent 1): <strong class="text-emerald-400">Bb</strong></span>
+                <span>x</span>
+                <span>แม่ (Parent 2): <strong class="text-emerald-400">Bb</strong></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 max-w-xs font-mono text-center text-xs">
+                <div class="p-2.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">BB (25%) เด่นแท้</div>
+                <div class="p-2.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Bb (25%) พาหะ</div>
+                <div class="p-2.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Bb (25%) พาหะ</div>
+                <div class="p-2.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">bb (25%) ด้อยแท้</div>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-2">อัตราส่วนฟีโนไทป์: <strong>เด่น 3 : ด้อย 1 (75% Dominant : 25% Recessive)</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 3: Microbiology & Immunology Viewport -->
+        <div id="sim-view-microbio" class="sim-module-view flex-1 hidden p-4 flex flex-col lg:flex-row gap-4 items-center justify-center">
+          <!-- Petri Dish Canvas -->
+          <div class="relative flex items-center justify-center">
+            <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-full border-4 border-slate-600 bg-amber-950/20 relative shadow-2xl overflow-hidden flex items-center justify-center">
+              <canvas id="petri-canvas" width="300" height="300"></canvas>
+            </div>
+          </div>
+          <!-- Antimicrobial Disc Table -->
+          <div class="w-full lg:w-80 bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-xs space-y-3">
+            <h4 class="font-bold text-white text-xs">การทดสอบความไวต่อยาปฏิชีวนะ (Kirby-Bauer Disc Diffusion)</h4>
+            <p class="text-[11px] text-slate-400">เชื้อตัวอย่าง: <em>Staphylococcus aureus</em> บนอาหารเลี้ยงเชื้อ Mueller-Hinton Agar</p>
+            
+            <div class="space-y-2 text-[11px]">
+              <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Penicillin (P10)</span>
+                <span class="font-mono text-emerald-400">Halo: 28 mm (Sensitive)</span>
+              </div>
+              <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Ampicillin (AMP10)</span>
+                <span class="font-mono text-rose-400">Halo: 9 mm (Resistant)</span>
+              </div>
+              <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Tetracycline (TE30)</span>
+                <span class="font-mono text-emerald-400">Halo: 22 mm (Sensitive)</span>
+              </div>
+            </div>
+
+            <button id="btn-incubate-agar" class="w-full py-2 bg-emerald-500 text-slate-950 font-bold rounded-lg hover:bg-emerald-400 transition-colors">
+              <i class="fas fa-temperature-high mr-1"></i> อบเชื้อ 37°C 24 ชม. (Re-Incubate)
+            </button>
+          </div>
+        </div>
+
+        <!-- MODULE 4: Anatomy & Physiology Viewport -->
+        <div id="sim-view-anatomy" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 mb-3 flex-1 flex flex-col">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-bold text-white text-xs flex items-center gap-2">
+                <i class="fas fa-heartbeat text-rose-500"></i> สัญญาณคลื่นไฟฟ้าหัวใจ (Electrocardiogram - ECG Monitor)
+              </span>
+              <span class="text-rose-400 font-mono font-bold text-sm" id="ecg-bpm-label">75 BPM (Normal Sinus)</span>
+            </div>
+            <!-- ECG Wave Canvas -->
+            <div class="flex-1 bg-black rounded-lg border border-slate-800 p-2 relative min-h-[160px]">
+              <canvas id="ecg-canvas" class="w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">อัตราการเต้นของหัวใจ:</span>
+              <input type="range" id="ecg-bpm-slider" min="40" max="180" value="75" class="w-full accent-rose-500 mt-1">
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ความดันโลหิต (Blood Pressure):</span>
+              <div class="text-sm font-bold font-mono text-cyan-300 mt-1" id="label-bp">120 / 80 mmHg</div>
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ปริมาตรเลือดต่อนาที (Cardiac Output):</span>
+              <div class="text-sm font-bold font-mono text-emerald-400 mt-1" id="label-co">5.25 L/min</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 5: Ecology & Field Biology Viewport -->
+        <div id="sim-view-ecology" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex-1 flex flex-col mb-3">
+            <div class="flex justify-between items-center mb-2 text-xs">
+              <span class="font-bold text-white flex items-center gap-2">
+                <i class="fas fa-chart-line text-emerald-400"></i> แบบจำลองประชากรผู้ล่า-เหยื่อ (Lotka-Volterra Model)
+              </span>
+              <div class="flex items-center gap-3 font-mono text-[11px]">
+                <span class="text-emerald-400">กระต่าย (เหยื่อ): <strong id="eco-prey-val">100</strong></span>
+                <span class="text-rose-400">หมาป่า (ผู้ล่า): <strong id="eco-pred-val">20</strong></span>
+              </div>
+            </div>
+            <div class="flex-1 min-h-[180px] relative">
+              <canvas id="ecology-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">อัตราการเกิดของเหยื่อ (Prey Growth):</span>
+              <input type="range" id="eco-prey-growth" min="0.1" max="1.5" step="0.1" value="0.8" class="w-full accent-emerald-400 mt-1">
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ความจุสิ่งแวดล้อม (Carrying Capacity):</span>
+              <input type="range" id="eco-capacity" min="50" max="300" step="10" value="150" class="w-full accent-cyan-400 mt-1">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Telemetry Log Footer Bar -->
+      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-2 truncate">
+          <i class="fas fa-terminal text-emerald-400"></i>
+          <span id="bio-telemetry-text">บันทึกสภาวะ: อุณหภูมิแล็บ 24.5°C | ค่ากำลังส่องสว่าง 80% | Slide Focus: Sharp</span>
+        </div>
+        <span class="text-emerald-400 font-mono font-bold shrink-0">DATA LOGGED</span>
+      </div>
+
+      <!-- OVERLAY: Custom Lab Designer Modal/Workbench ("ออกแบบแล็บเป็นตัวเองได้") -->
+      <div id="custom-lab-workbench-modal" class="hidden absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between rounded-2xl border border-cyan-500/40">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-tools text-cyan-400 text-lg"></i>
+              <div>
+                <h3 class="text-sm font-bold text-white">ออกแบบห้องปฏิบัติการชีววิทยา (Custom Biology Lab Designer)</h3>
+                <p class="text-[11px] text-slate-400">จัดวางอุปกรณ์วิทยาศาสตร์บนโต๊ะแล็บในสไตล์ของคุณเอง</p>
+              </div>
+            </div>
+            <button id="btn-close-custom-lab" class="p-1.5 text-slate-400 hover:text-white">&times;</button>
+          </div>
+
+          <div class="mt-4 space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อห้องแล็บส่วนตัวของคุณ</label>
+              <input type="text" id="custom-lab-name-input" value="ห้องปฏิบัติการพันธุวิศวกรรมขั้นสูง (Genetic Engineering Lab)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400">
+            </div>
+
+            <!-- Available Equipment Badges to drag/click -->
+            <div>
+              <span class="block text-xs font-semibold text-slate-300 mb-2">คลิกเพื่อเพิ่มอุปกรณ์ลงโต๊ะปฏิบัติการ:</span>
+              <div class="flex flex-wrap gap-2 text-xs" id="custom-equipment-pool">
+                <button class="btn-add-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 border border-slate-700" data-item="Microscope 1000x">
+                  <i class="fas fa-microscope text-emerald-400 mr-1"></i> Microscope 1000x
+                </button>
+                <button class="btn-add-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500/20 text-slate-300 border border-slate-700" data-item="Centrifuge 15k RPM">
+                  <i class="fas fa-circle-notch text-cyan-400 mr-1"></i> Centrifuge 15k RPM
+                </button>
+                <button class="btn-add-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-500/20 text-slate-300 border border-slate-700" data-item="PCR Thermal Cycler">
+                  <i class="fas fa-dna text-purple-400 mr-1"></i> PCR Thermal Cycler
+                </button>
+                <button class="btn-add-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-300 border border-slate-700" data-item="Bio-Safety Cabinet II">
+                  <i class="fas fa-shield-virus text-amber-400 mr-1"></i> Bio-Safety Cabinet II
+                </button>
+                <button class="btn-add-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-300 border border-slate-700" data-item="Gel Electrophoresis Box">
+                  <i class="fas fa-bars-progress text-rose-400 mr-1"></i> Gel Electrophoresis Box
+                </button>
+              </div>
+            </div>
+
+            <!-- Customized Bench Slots -->
+            <div>
+              <span class="block text-xs font-semibold text-slate-300 mb-2">ผังโต๊ะปฏิบัติการปัจจุบัน (Active Workbench Slots):</span>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="custom-bench-display">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex justify-end gap-2">
+          <button id="btn-save-custom-lab" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition-colors shadow-lg">
+            <i class="fas fa-save mr-1.5"></i> บันทึกผังห้องแล็บลงระบบ
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT PANEL: Universal AI Tutor & Multimodal Assistant -->
+    <aside id="biology-ai-container" class="tri-panel-right flex flex-col min-h-0"></aside>
+
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav id="nexus-mobile-nav"></nav>
+
+  <!-- Scripts -->
+  <script src="js/nexus-core.js"></script>
+  <script src="js/ai-tutor.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      NexusCore.renderNavbar('biology');
+      NexusCore.renderMobileBottomNav('bio');
+
+      // Initialize Universal AI Tutor in the right panel
+      NexusAITutor.init('biology-ai-container', {
+        discipline: 'biology',
+        topic: 'เซลล์ชีววิทยา & กล้องจุลทรรศน์'
+      });
+
+      // Module Switcher
+      const modButtons = document.querySelectorAll('.bio-mod-btn');
+      const simViews = {
+        microscopy: document.getElementById('sim-view-microscopy'),
+        genetics: document.getElementById('sim-view-genetics'),
+        microbio: document.getElementById('sim-view-microbio'),
+        anatomy: document.getElementById('sim-view-anatomy'),
+        ecology: document.getElementById('sim-view-ecology')
+      };
+
+      const titleMap = {
+        microscopy: 'เซลล์ชีววิทยา & กล้องจุลทรรศน์ (Cell Biology & Microscopy)',
+        genetics: 'ชีววิทยาโมเลกุล & พันธุศาสตร์ (Molecular Biology & Genetics)',
+        microbio: 'จุลชีววิทยา & ภูมิคุ้มกัน (Microbiology & Immunology)',
+        anatomy: 'กายวิภาคศาสตร์ & สรีรวิทยา (Anatomy & Physiology)',
+        ecology: 'นิเวศวิทยา & ชีววิทยาภาคสนาม (Ecology & Field Biology)'
+      };
+
+      modButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mod = btn.getAttribute('data-mod');
+          NexusCore.Sound.click();
+
+          // Highlight button
+          modButtons.forEach(b => {
+            b.className = 'bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60';
+          });
+          btn.className = 'bio-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+
+          // Show view
+          Object.keys(simViews).forEach(k => {
+            if (simViews[k]) simViews[k].classList.add('hidden');
+          });
+          if (simViews[mod]) {
+            simViews[mod].classList.remove('hidden');
+          }
+
+          document.getElementById('active-sim-title').textContent = titleMap[mod];
+          NexusAITutor.setContext('biology', titleMap[mod]);
+
+          if (mod === 'ecology') initEcologyChart();
+        });
+      });
+
+      // --- SIMULATION 1: MICROSCOPY SIMULATOR CANVAS ---
+      const microCanvas = document.getElementById('microscope-canvas');
+      let microCtx = microCanvas ? microCanvas.getContext('2d') : null;
+      let currentSlide = 'onion';
+      let currentMag = 400;
+      let focusQuality = 0.95; // 0 to 1
+      let lightIntensity = 0.8;
+      let currentDye = 'methylene';
+
+      function drawMicroscopeView() {
+        if (!microCtx) return;
+        const w = microCanvas.width;
+        const h = microCanvas.height;
+
+        microCtx.fillStyle = '#030712';
+        microCtx.fillRect(0, 0, w, h);
+
+        // Light background
+        const lightGrad = microCtx.createRadialGradient(w/2, h/2, 10, w/2, h/2, w/2);
+        const alpha = Math.min(1, lightIntensity);
+        lightGrad.addColorStop(0, `rgba(240, 253, 250, ${alpha * 0.95})`);
+        lightGrad.addColorStop(0.7, `rgba(153, 246, 228, ${alpha * 0.7})`);
+        lightGrad.addColorStop(1, `rgba(13, 148, 136, ${alpha * 0.2})`);
+
+        microCtx.fillStyle = lightGrad;
+        microCtx.beginPath();
+        microCtx.arc(w/2, h/2, w/2, 0, Math.PI * 2);
+        microCtx.fill();
+
+        // Apply blur according to focus
+        const blurAmount = Math.abs(1 - focusQuality) * 8;
+        microCtx.filter = `blur(${blurAmount}px)`;
+
+        // Specimen drawing based on slide
+        if (currentSlide === 'onion') {
+          // Plant cell brick pattern
+          microCtx.strokeStyle = currentDye === 'iodine' ? 'rgba(180, 83, 9, 0.8)' : 'rgba(30, 64, 175, 0.8)';
+          microCtx.lineWidth = 2;
+          const rows = currentMag >= 400 ? 4 : 8;
+          const cols = currentMag >= 400 ? 3 : 6;
+          const cellW = w / cols;
+          const cellH = h / rows;
+
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const x = c * cellW + (r % 2 === 0 ? 0 : cellW/3);
+              const y = r * cellH;
+              microCtx.strokeRect(x, y, cellW, cellH);
+
+              // Nucleus
+              microCtx.fillStyle = currentDye === 'iodine' ? 'rgba(217, 119, 6, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+              microCtx.beginPath();
+              microCtx.arc(x + cellW/2, y + cellH/2, cellH * 0.18, 0, Math.PI * 2);
+              microCtx.fill();
+            }
+          }
+        } else if (currentSlide === 'paramecium') {
+          // Slipper shape
+          microCtx.fillStyle = 'rgba(16, 185, 129, 0.6)';
+          microCtx.strokeStyle = 'rgba(5, 150, 105, 0.9)';
+          microCtx.lineWidth = 2;
+          microCtx.beginPath();
+          microCtx.ellipse(w/2, h/2, 70, 35, 0.4, 0, Math.PI * 2);
+          microCtx.fill();
+          microCtx.stroke();
+
+          // Contractile vacuole & macronucleus
+          microCtx.fillStyle = '#f59e0b';
+          microCtx.beginPath();
+          microCtx.arc(w/2 - 20, h/2 - 5, 10, 0, Math.PI * 2);
+          microCtx.fill();
+        } else if (currentSlide === 'chloroplast') {
+          // Green plant cells with streaming green dots
+          microCtx.fillStyle = '#10b981';
+          const time = Date.now() * 0.001;
+          for (let i = 0; i < 28; i++) {
+            const angle = (i / 28) * Math.PI * 2 + time * 0.5;
+            const r = 50 + (i % 3) * 20;
+            const px = w/2 + Math.cos(angle) * r;
+            const py = h/2 + Math.sin(angle) * r;
+            microCtx.beginPath();
+            microCtx.arc(px, py, 6, 0, Math.PI * 2);
+            microCtx.fill();
+          }
+        } else {
+          // Cheek cells - irregular rounded
+          microCtx.fillStyle = 'rgba(147, 197, 253, 0.5)';
+          microCtx.strokeStyle = 'rgba(37, 99, 235, 0.8)';
+          microCtx.lineWidth = 2;
+          microCtx.beginPath();
+          microCtx.arc(w/2, h/2, 55, 0, Math.PI * 2);
+          microCtx.fill();
+          microCtx.stroke();
+
+          // Dense dark nucleus
+          microCtx.fillStyle = '#1e3a8a';
+          microCtx.beginPath();
+          microCtx.arc(w/2 + 6, h/2 - 4, 11, 0, Math.PI * 2);
+          microCtx.fill();
+        }
+
+        microCtx.filter = 'none';
+      }
+
+      drawMicroscopeView();
+
+      // Controls event listeners
+      document.getElementById('micro-slide-select')?.addEventListener('change', (e) => {
+        currentSlide = e.target.value;
+        drawMicroscopeView();
+        NexusCore.Sound.click();
+      });
+
+      document.querySelectorAll('.btn-mag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-mag').forEach(b => b.className = 'btn-mag py-1.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono text-[11px]');
+          btn.className = 'btn-mag py-1.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-[11px] font-bold';
+          currentMag = parseInt(btn.getAttribute('data-mag'), 10);
+          document.getElementById('label-mag').textContent = `${currentMag}x`;
+          drawMicroscopeView();
+          NexusCore.Sound.beep(550, 0.05);
+        });
+      });
+
+      const focusSlider = document.getElementById('micro-focus-slider');
+      focusSlider?.addEventListener('input', (e) => {
+        focusQuality = parseInt(e.target.value, 10) / 100;
+        const pct = Math.round(focusQuality * 100);
+        document.getElementById('label-focus').textContent = pct > 90 ? `${pct}% (คมชัด)` : `${pct}% (เบลอ)`;
+        drawMicroscopeView();
+      });
+
+      const lightSlider = document.getElementById('micro-light-slider');
+      lightSlider?.addEventListener('input', (e) => {
+        lightIntensity = parseInt(e.target.value, 10) / 100;
+        document.getElementById('label-light').textContent = `${Math.round(lightIntensity * 100)}%`;
+        drawMicroscopeView();
+      });
+
+      document.querySelectorAll('.btn-dye').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentDye = btn.getAttribute('data-dye');
+          drawMicroscopeView();
+          NexusCore.Sound.bubble();
+        });
+      });
+
+      // --- SIMULATION 2: DNA TRANSLATION ---
+      const codonTable = {
+        'AUG': 'Met (Start)', 'GCC': 'Ala', 'GCU': 'Ala', 'GCA': 'Ala',
+        'UAA': 'Stop', 'UAG': 'Stop', 'UGA': 'Stop',
+        'GUA': 'Val', 'GUU': 'Val', 'GUC': 'Val',
+        'UUU': 'Phe', 'UUC': 'Phe', 'UUA': 'Leu',
+        'CCU': 'Pro', 'CCC': 'Pro', 'CCA': 'Pro'
+      };
+
+      document.getElementById('btn-transcribe-dna')?.addEventListener('click', () => {
+        const dna = document.getElementById('dna-input-seq').value.toUpperCase().replace(/[^ATCG]/g, '');
+        // Transcription: A->U, T->A, C->G, G->C
+        let mrna = '';
+        for (let base of dna) {
+          if (base === 'A') mrna += 'U';
+          else if (base === 'T') mrna += 'A';
+          else if (base === 'C') mrna += 'G';
+          else if (base === 'G') mrna += 'C';
+        }
+
+        // Chunk into codons of 3
+        const codons = [];
+        const peptides = [];
+        for (let i = 0; i < mrna.length; i += 3) {
+          const codon = mrna.substring(i, i + 3);
+          if (codon.length === 3) {
+            codons.push(codon);
+            peptides.push(codonTable[codon] || 'Unknown-aa');
+          }
+        }
+
+        document.getElementById('mrna-output').textContent = codons.join('-');
+        document.getElementById('peptide-output').textContent = peptides.join(' - ') || 'สายสั้นเกินไป';
+        NexusCore.Sound.success();
+      });
+
+      // --- SIMULATION 3: PETRI DISH CANVAS ---
+      const petriCanvas = document.getElementById('petri-canvas');
+      if (petriCanvas) {
+        const pctx = petriCanvas.getContext('2d');
+        function drawPetri() {
+          const w = petriCanvas.width;
+          const h = petriCanvas.height;
+          pctx.fillStyle = '#451a03'; // Agar color
+          pctx.fillRect(0, 0, w, h);
+
+          // Bacterial lawn dots
+          pctx.fillStyle = '#fef08a';
+          for (let i = 0; i < 400; i++) {
+            pctx.beginPath();
+            pctx.arc(Math.random() * w, Math.random() * h, 1.2, 0, Math.PI * 2);
+            pctx.fill();
+          }
+
+          // Disc 1: Penicillin (Zone of inhibition)
+          pctx.fillStyle = 'rgba(69, 26, 3, 0.9)';
+          pctx.beginPath();
+          pctx.arc(80, 100, 38, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = '#fff';
+          pctx.beginPath();
+          pctx.arc(80, 100, 8, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = '#000';
+          pctx.font = '8px sans-serif';
+          pctx.fillText('P10', 73, 103);
+
+          // Disc 2: Ampicillin (Resistant - minimal halo)
+          pctx.fillStyle = 'rgba(69, 26, 3, 0.9)';
+          pctx.beginPath();
+          pctx.arc(220, 100, 14, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = '#fff';
+          pctx.beginPath();
+          pctx.arc(220, 100, 8, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = '#000';
+          pctx.fillText('AMP', 213, 103);
+
+          // Disc 3: Tetracycline
+          pctx.fillStyle = 'rgba(69, 26, 3, 0.9)';
+          pctx.beginPath();
+          pctx.arc(150, 210, 30, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = '#fff';
+          pctx.beginPath();
+          pctx.arc(150, 210, 8, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = '#000';
+          pctx.fillText('TE', 145, 213);
+        }
+        drawPetri();
+
+        document.getElementById('btn-incubate-agar')?.addEventListener('click', () => {
+          drawPetri();
+          NexusCore.Sound.bubble();
+          NexusCore.toast('บ่มเพาะเชื้อ 37°C 24 ชม. เรียบร้อยแล้ว (Zone of inhibition ชัดเจน)', 'success');
+        });
+      }
+
+      // --- SIMULATION 4: ECG CANVAS ---
+      const ecgCanvas = document.getElementById('ecg-canvas');
+      if (ecgCanvas) {
+        const ectx = ecgCanvas.getContext('2d');
+        let ecgX = 0;
+        let bpm = 75;
+
+        function animateECG() {
+          const w = ecgCanvas.width = ecgCanvas.parentElement.clientWidth;
+          const h = ecgCanvas.height = ecgCanvas.parentElement.clientHeight;
+
+          ectx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+          ectx.fillRect(0, 0, w, h);
+
+          // Green grid
+          ectx.strokeStyle = 'rgba(16, 185, 129, 0.1)';
+          ectx.lineWidth = 0.5;
+          for (let x = 0; x < w; x += 20) {
+            ectx.beginPath(); ectx.moveTo(x, 0); ectx.lineTo(x, h); ectx.stroke();
+          }
+          for (let y = 0; y < h; y += 20) {
+            ectx.beginPath(); ectx.moveTo(0, y); ectx.lineTo(w, y); ectx.stroke();
+          }
+
+          requestAnimationFrame(animateECG);
+        }
+        animateECG();
+
+        document.getElementById('ecg-bpm-slider')?.addEventListener('input', (e) => {
+          bpm = parseInt(e.target.value, 10);
+          document.getElementById('ecg-bpm-label').textContent = `${bpm} BPM (${bpm > 100 ? 'Tachycardia' : bpm < 60 ? 'Bradycardia' : 'Normal'})`;
+          document.getElementById('label-co').textContent = `${((bpm * 70) / 1000).toFixed(2)} L/min`;
+        });
+      }
+
+      // --- SIMULATION 5: ECOLOGY LOTKA-VOLTERRA CHART ---
+      let ecoChart = null;
+      function initEcologyChart() {
+        const ctx = document.getElementById('ecology-chart')?.getContext('2d');
+        if (!ctx || ecoChart) return;
+
+        const labels = Array.from({ length: 30 }, (_, i) => `ปี ${i + 1}`);
+        const preyData = [100, 140, 180, 220, 210, 150, 90, 70, 85, 130, 190, 230, 200, 140, 85, 75, 110, 170, 225, 205, 135, 80, 78, 115, 175, 220, 195, 130, 82, 80];
+        const predData = [20, 22, 28, 45, 65, 72, 60, 40, 25, 21, 26, 42, 63, 70, 58, 38, 24, 22, 29, 48, 67, 68, 52, 35, 23, 22, 31, 50, 68, 62];
+
+        ecoChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'กระต่าย (เหยื่อ Prey)',
+                data: preyData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.35,
+                fill: true
+              },
+              {
+                label: 'หมาป่า (ผู้ล่า Predator)',
+                data: predData,
+                borderColor: '#f43f5e',
+                backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                tension: 0.35,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: '#64748b', font: { size: 9 } } },
+              y: { ticks: { color: '#64748b', font: { size: 9 } } }
+            },
+            plugins: {
+              legend: { labels: { color: '#cbd5e1', font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      // --- CUSTOM LAB WORKBENCH DESIGNER ENGINE ("ออกแบบแล็บเป็นตัวเองได้") ---
+      const customModal = document.getElementById('custom-lab-workbench-modal');
+      const customToggle = document.getElementById('btn-custom-lab-toggle');
+      const customClose = document.getElementById('btn-close-custom-lab');
+      const customBenchDisplay = document.getElementById('custom-bench-display');
+      const customLabNameInput = document.getElementById('custom-lab-name-input');
+
+      let savedBioLab = NexusCore.getCustomLab('biology') || {
+        name: 'ห้องปฏิบัติการพันธุวิศวกรรมขั้นสูง (Genetic Engineering Lab)',
+        colorTheme: '#10b981',
+        equipment: ['Microscope 1000x', 'Centrifuge 15k RPM', 'PCR Thermal Cycler', 'Bio-Safety Cabinet II']
+      };
+
+      function renderCustomBenchSlots() {
+        if (!customBenchDisplay) return;
+        customBenchDisplay.innerHTML = savedBioLab.equipment.map((item, idx) => `
+          <div class="lab-bench-slot p-3 bg-slate-900/60 rounded-xl border border-cyan-500/30 flex flex-col items-center justify-between text-center relative group">
+            <span class="text-[10px] text-slate-500 font-mono">สล็อต #${idx + 1}</span>
+            <div class="my-1.5 font-bold text-white text-xs">${item}</div>
+            <button class="btn-remove-slot text-rose-400 hover:text-rose-300 text-[10px]" data-idx="${idx}">
+              <i class="fas fa-trash-alt mr-1"></i> ลบออก
+            </button>
+          </div>
+        `).join('');
+
+        // Remove slot handler
+        document.querySelectorAll('.btn-remove-slot').forEach(b => {
+          b.addEventListener('click', () => {
+            const idx = parseInt(b.getAttribute('data-idx'), 10);
+            savedBioLab.equipment.splice(idx, 1);
+            renderCustomBenchSlots();
+            NexusCore.Sound.click();
+          });
+        });
+      }
+
+      customToggle?.addEventListener('click', () => {
+        customModal.classList.remove('hidden');
+        renderCustomBenchSlots();
+        NexusCore.Sound.click();
+      });
+
+      customClose?.addEventListener('click', () => {
+        customModal.classList.add('hidden');
+        NexusCore.Sound.click();
+      });
+
+      // Add equipment to custom bench
+      document.querySelectorAll('.btn-add-equip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.getAttribute('data-item');
+          if (savedBioLab.equipment.length >= 8) {
+            NexusCore.toast('โต๊ะแล็บเต็มแล้ว (สูงสุด 8 อุปกรณ์)', 'warning');
+            return;
+          }
+          savedBioLab.equipment.push(item);
+          renderCustomBenchSlots();
+          NexusCore.Sound.bubble();
+        });
+      });
+
+      // Save custom lab to localStorage
+      document.getElementById('btn-save-custom-lab')?.addEventListener('click', () => {
+        savedBioLab.name = customLabNameInput.value.trim() || 'My Custom Biology Lab';
+        NexusCore.saveCustomLab('biology', savedBioLab);
+        customModal.classList.add('hidden');
+      });
+
+      // Export Telemetry (CSV download)
+      document.getElementById('btn-export-telemetry')?.addEventListener('click', () => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+          + "Timestamp,Module,Parameter,Value\n"
+          + `${new Date().toISOString()},Microscopy,Magnification,${currentMag}x\n`
+          + `${new Date().toISOString()},Microscopy,FocusQuality,${(focusQuality*100).toFixed(0)}%\n`
+          + `${new Date().toISOString()},Anatomy,HeartRate,75 BPM\n`
+          + `${new Date().toISOString()},Ecology,PreyPopulation,100\n`;
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "nexuslab_biology_telemetry.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        NexusCore.toast('ส่งออกไฟล์ผลการทดลอง CSV สำเร็จแล้ว', 'success');
+      });
+    });
+  </script>
+</body>
+</html>

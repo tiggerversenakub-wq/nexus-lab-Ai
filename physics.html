@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องแล็บฟิสิกส์ (Physics Workstation) - NexusLab AI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            sky: { 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
+            cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+            indigo: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome & Theme CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-theme.css">
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col selection:bg-sky-500 selection:text-white">
+
+  <!-- Nav Header -->
+  <header id="nexus-main-nav" class="sticky top-0 z-50 glass-header"></header>
+
+  <!-- Workstation Tri-Panel Container -->
+  <div class="tri-panel-container flex-1">
+    
+    <!-- LEFT PANEL: Physics Modules Navigation & Custom Lab Designer -->
+    <aside class="tri-panel-left glass-panel rounded-2xl p-4 flex flex-col justify-between overflow-y-auto border border-sky-500/20">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-base border border-sky-500/40">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+              <h2 class="text-xs font-black uppercase tracking-wider text-white">Physics Lab</h2>
+              <span class="text-[10px] text-sky-400 font-mono">5 Modules Ready</span>
+            </div>
+          </div>
+          <button id="btn-toggle-left" class="lg:hidden text-slate-400 hover:text-white text-xs">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- 5 Physics Modules List -->
+        <div class="space-y-1.5" id="phys-modules-list">
+          <button class="phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all bg-sky-500/20 text-sky-300 border border-sky-500/40" data-mod="mechanics">
+            <i class="fas fa-shapes text-sky-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>กลศาสตร์ & ลูกตุ้มคู่ Chaotic</div>
+              <div class="text-[10px] text-slate-400 font-normal">Double Pendulum Mechanics</div>
+            </div>
+          </button>
+
+          <button class="phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="electromagnet">
+            <i class="fas fa-magnet text-sky-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>ไฟฟ้าแม่เหล็ก & ฟาราเดย์</div>
+              <div class="text-[10px] text-slate-400 font-normal">Faraday Induction Coil</div>
+            </div>
+          </button>
+
+          <button class="phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="optics">
+            <i class="fas fa-eye text-sky-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>คลื่น แสง เลนส์ & เสียง</div>
+              <div class="text-[10px] text-slate-400 font-normal">Optics Bench & Ray Tracing</div>
+            </div>
+          </button>
+
+          <button class="phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="thermo">
+            <i class="fas fa-fire-alt text-sky-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>อุณหพลศาสตร์ & วัฏจักร Carnot</div>
+              <div class="text-[10px] text-slate-400 font-normal">Carnot Heat Engine</div>
+            </div>
+          </button>
+
+          <button class="phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60" data-mod="quantum">
+            <i class="fas fa-atom text-sky-400 w-4 text-center"></i>
+            <div class="truncate">
+              <div>ฟิสิกส์ควอนตัม & โฟโตอิเล็กทริก</div>
+              <div class="text-[10px] text-slate-400 font-normal">Photoelectric Effect</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Custom Lab Workbench Switcher -->
+        <div class="mt-5 pt-4 border-t border-slate-700/60">
+          <button id="btn-custom-lab-toggle" class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-slate-800/80 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center justify-between transition-all">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-tools text-sky-400"></i>
+              <span>ออกแบบโต๊ะแล็บฟิสิกส์</span>
+            </span>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Telemetry CSV Export -->
+      <div class="pt-3 border-t border-slate-700/60 mt-3 text-[11px] text-slate-400">
+        <button id="btn-export-phys-csv" class="w-full py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:text-white flex items-center justify-center gap-1.5 transition-colors">
+          <i class="fas fa-download text-xs text-sky-400"></i>
+          <span>ส่งออกข้อมูลฟิสิกส์ (CSV)</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER PANEL: Interactive Simulation Workbench -->
+    <main class="tri-panel-center glass-panel rounded-2xl p-4 flex flex-col min-h-0 border border-sky-500/20 relative">
+      
+      <!-- Top Title Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span>
+          <h1 id="active-sim-title" class="font-bold text-white text-sm">กลศาสตร์ & ลูกตุ้มคู่ Chaotic (Double Pendulum Mechanics)</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-reset-phys" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-[11px] flex items-center gap-1">
+            <i class="fas fa-redo-alt text-[10px]"></i> รีเซ็ต
+          </button>
+          <button id="btn-toggle-tutor" class="lg:hidden px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[11px] flex items-center gap-1">
+            <i class="fas fa-brain text-[10px]"></i> AI Tutor
+          </button>
+        </div>
+      </div>
+
+      <!-- SIMULATION VIEWPORT CONTAINER -->
+      <div class="flex-1 my-3 rounded-xl overflow-hidden relative flex flex-col justify-between bg-slate-950 border border-slate-800 min-h-[360px]">
+        
+        <!-- MODULE 1: Double Pendulum Viewport (Default) -->
+        <div id="sim-view-mechanics" class="sim-module-view flex-1 flex flex-col lg:flex-row p-4 gap-4">
+          <!-- Canvas for double pendulum with trajectory trail -->
+          <div class="flex-1 bg-slate-900/60 rounded-xl border border-slate-800 relative flex items-center justify-center overflow-hidden min-h-[240px]">
+            <canvas id="pendulum-canvas" class="w-full h-full"></canvas>
+            <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-300 bg-slate-900/80 px-2 py-1 rounded border border-cyan-500/30">
+              Chaotic Path Trail: Active
+            </div>
+          </div>
+
+          <!-- Mechanics Controls -->
+          <div class="w-full lg:w-72 bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-4 text-xs">
+            <div class="font-bold text-white flex items-center gap-2">
+              <i class="fas fa-sliders-h text-sky-400"></i> ตัวแปรกลศาสตร์ไม่เป็นเชิงเส้น
+            </div>
+
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>ความยาวก้านแขน (L1 & L2):</span>
+                <span id="pend-len-label" class="font-mono text-sky-400">100 px</span>
+              </div>
+              <input type="range" id="pend-len-slider" min="60" max="140" value="100" class="w-full accent-sky-400">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>แรงโน้มถ่วงจำลอง (g):</span>
+                <span id="pend-g-label" class="font-mono text-emerald-400">9.8 m/s²</span>
+              </div>
+              <input type="range" id="pend-g-slider" min="1" max="25" value="9.8" step="0.5" class="w-full accent-emerald-400">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>แรงต้านทานอากาศ (Damping):</span>
+                <span id="pend-damp-label" class="font-mono text-amber-400">0.001</span>
+              </div>
+              <input type="range" id="pend-damp-slider" min="0" max="0.01" step="0.001" value="0.001" class="w-full accent-amber-400">
+            </div>
+
+            <div class="pt-2 flex gap-2">
+              <button id="btn-clear-trail" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-[11px]">
+                ล้างรอยเส้นวิถี
+              </button>
+              <button id="btn-kick-pendulum" class="flex-1 py-1.5 bg-sky-500 text-slate-950 font-bold rounded-lg hover:bg-sky-400 text-[11px]">
+                ส่งแรงผลัก (Kick)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 2: Electromagnetism Faraday Viewport -->
+        <div id="sim-view-electromagnet" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="bg-slate-900/60 rounded-xl border border-slate-800 flex-1 relative flex items-center justify-center p-4">
+            <canvas id="faraday-canvas" class="w-full h-full min-h-[220px]"></canvas>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mt-3">
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">เลื่อนแท่งแม่เหล็ก (Magnet Position):</span>
+              <input type="range" id="magnet-pos-slider" min="0" max="100" value="30" class="w-full accent-rose-500 mt-1">
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+              <span class="text-slate-400 text-[11px]">แรงเคลื่อนไฟฟ้าเหนี่ยวนำ (EMF):</span>
+              <div class="text-base font-black font-mono text-cyan-400 mt-1" id="emf-voltage-label">0.00 V</div>
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+              <span class="text-slate-400 text-[11px]">จำนวนรอบของขดลวด (N Coils):</span>
+              <div class="text-base font-black font-mono text-amber-400 mt-1">200 Turns</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 3: Waves, Optics & Sound Viewport -->
+        <div id="sim-view-optics" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="bg-slate-900/60 rounded-xl border border-slate-800 flex-1 relative flex items-center justify-center p-2">
+            <canvas id="optics-canvas" class="w-full h-full min-h-[220px]"></canvas>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mt-3">
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ชนิดของเลนส์ (Lens Type):</span>
+              <select id="lens-type-select" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-sky-300 mt-1 focus:outline-none">
+                <option value="convex">เลนส์นูน (Convex - รวมแสง)</option>
+                <option value="concave">เลนส์เว้า (Concave - กระจายแสง)</option>
+              </select>
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>ความยาวโฟกัส (Focal Length f):</span>
+                <span id="focal-len-label" class="text-sky-300 font-mono">80 mm</span>
+              </div>
+              <input type="range" id="focal-len-slider" min="40" max="150" value="80" class="w-full accent-sky-400 mt-1">
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <div class="flex justify-between text-slate-400 text-[11px]">
+                <span>ตำแหน่งวัตถุ (Object Distance s):</span>
+                <span id="obj-dist-label" class="text-emerald-400 font-mono">160 mm</span>
+              </div>
+              <input type="range" id="obj-dist-slider" min="60" max="250" value="160" class="w-full accent-emerald-400 mt-1">
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 4: Thermodynamics Carnot Cycle Viewport -->
+        <div id="sim-view-thermo" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 mb-3">
+            <div class="bg-slate-900/60 rounded-xl border border-slate-800 p-3 flex flex-col items-center justify-center relative min-h-[200px]">
+              <canvas id="carnot-canvas" class="w-full h-full"></canvas>
+            </div>
+            <div class="bg-slate-900/80 rounded-xl border border-slate-800 p-4 space-y-3 text-xs">
+              <div class="font-bold text-white text-xs">ประสิทธิภาพเชิงความร้อน (Carnot Efficiency)</div>
+              <p class="text-[11px] text-slate-400">$\eta = 1 - \frac{T_C}{T_H}$</p>
+              
+              <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-center">
+                <div class="text-[10px] text-slate-500 uppercase">Thermal Efficiency (η):</div>
+                <div class="text-2xl font-black text-emerald-400 font-mono mt-1" id="carnot-eff-val">50.0%</div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>แหล่งความร้อนสูง (TH Hot Reservoir):</span>
+                  <span id="th-val-label" class="font-mono text-rose-400">600 K</span>
+                </div>
+                <input type="range" id="th-slider" min="400" max="1000" value="600" class="w-full accent-rose-500">
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-1">
+                  <span>แหล่งความร้อนต่ำ (TC Cold Reservoir):</span>
+                  <span id="tc-val-label" class="font-mono text-cyan-400">300 K</span>
+                </div>
+                <input type="range" id="tc-slider" min="100" max="400" value="300" class="w-full accent-cyan-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 5: Quantum & Photoelectric Viewport -->
+        <div id="sim-view-quantum" class="sim-module-view flex-1 hidden p-4 flex flex-col justify-between">
+          <div class="bg-slate-900/60 rounded-xl border border-slate-800 flex-1 relative flex items-center justify-center p-3 mb-3 min-h-[200px]">
+            <canvas id="photoelectric-canvas" class="w-full h-full"></canvas>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">ความยาวคลื่นแสง (Wavelength λ):</span>
+              <div class="flex justify-between text-sky-400 font-mono text-[11px] mt-0.5">
+                <span id="photo-wave-label">350 nm (UV)</span>
+              </div>
+              <input type="range" id="photo-wave-slider" min="200" max="750" value="350" class="w-full accent-sky-400 mt-1">
+            </div>
+
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <span class="text-slate-400 text-[11px]">โลหะเป้าหมาย (Work Function Φ):</span>
+              <select id="metal-work-select" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-amber-300 mt-1 focus:outline-none">
+                <option value="2.28">Sodium (Na, Φ = 2.28 eV)</option>
+                <option value="4.31">Zinc (Zn, Φ = 4.31 eV)</option>
+                <option value="4.70">Copper (Cu, Φ = 4.70 eV)</option>
+                <option value="6.35">Platinum (Pt, Φ = 6.35 eV)</option>
+              </select>
+            </div>
+
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+              <span class="text-slate-400 text-[11px]">พลังงานจลน์สูงสุด (Ek,max):</span>
+              <div class="text-base font-black font-mono text-emerald-400 mt-1" id="photo-ek-label">1.26 eV</div>
+              <div class="text-[10px] text-slate-400" id="photo-status-msg">● เกิดโฟโตอิเล็กตรอนหลุด</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Telemetry Bottom Bar -->
+      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-2 truncate">
+          <i class="fas fa-terminal text-sky-400"></i>
+          <span id="phys-telemetry-text">ความเร่งโน้มถ่วง g=9.80 m/s² | พลังงานรวมระบบอนุรักษ์ | เลนส์ Ray-tracer ทำงาน</span>
+        </div>
+        <span class="text-sky-400 font-mono font-bold shrink-0">PHYS-CALIBRATED</span>
+      </div>
+
+      <!-- OVERLAY: Custom Lab Designer Modal ("ออกแบบแล็บฟิสิกส์เป็นตัวเองได้") -->
+      <div id="custom-lab-workbench-modal" class="hidden absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between rounded-2xl border border-sky-500/40">
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-tools text-sky-400 text-lg"></i>
+              <div>
+                <h3 class="text-sm font-bold text-white">ออกแบบห้องปฏิบัติการฟิสิกส์ (Custom Physics Lab Designer)</h3>
+                <p class="text-[11px] text-slate-400">จัดวางรางเลนส์ออปติก ออสซิลโลสโคป และเครื่องยิงเลเซอร์</p>
+              </div>
+            </div>
+            <button id="btn-close-custom-lab" class="p-1.5 text-slate-400 hover:text-white">&times;</button>
+          </div>
+
+          <div class="mt-4 space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">ชื่อห้องแล็บฟิสิกส์ของคุณ</label>
+              <input type="text" id="custom-lab-name-input" value="สถานีทดสอบควอนตัมและเลเซอร์ (Quantum Optics Bay)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-sky-400">
+            </div>
+
+            <div>
+              <span class="block text-xs font-semibold text-slate-300 mb-2">คลิกเพื่อเพิ่มอุปกรณ์ลงโต๊ะแล็บฟิสิกส์:</span>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button class="btn-add-phys-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 text-slate-300 border border-slate-700" data-item="Laser Diode 532nm">
+                  <i class="fas fa-bolt text-sky-400 mr-1"></i> Laser Diode 532nm
+                </button>
+                <button class="btn-add-phys-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500/20 text-slate-300 border border-slate-700" data-item="Digital Oscilloscope 100MHz">
+                  <i class="fas fa-wave-square text-cyan-400 mr-1"></i> Digital Oscilloscope
+                </button>
+                <button class="btn-add-phys-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-500/20 text-slate-300 border border-slate-700" data-item="Precision Optical Rail">
+                  <i class="fas fa-ruler-horizontal text-purple-400 mr-1"></i> Precision Optical Rail
+                </button>
+                <button class="btn-add-phys-equip px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 border border-slate-700" data-item="Hall Effect Gaussmeter">
+                  <i class="fas fa-magnet text-emerald-400 mr-1"></i> Hall Effect Gaussmeter
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-xs font-semibold text-slate-300 mb-2">ผังโต๊ะปฏิบัติการฟิสิกส์ปัจจุบัน:</span>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="custom-phys-bench-display"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex justify-end gap-2">
+          <button id="btn-save-custom-phys-lab" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-500 text-slate-950 hover:bg-sky-400 transition-colors shadow-lg">
+            <i class="fas fa-save mr-1.5"></i> บันทึกผังห้องแล็บฟิสิกส์
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT PANEL: Universal AI Tutor -->
+    <aside id="physics-ai-container" class="tri-panel-right flex flex-col min-h-0"></aside>
+
+  </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav id="nexus-mobile-nav"></nav>
+
+  <!-- Scripts -->
+  <script src="js/nexus-core.js"></script>
+  <script src="js/ai-tutor.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      NexusCore.renderNavbar('physics');
+      NexusCore.renderMobileBottomNav('phys');
+
+      NexusAITutor.init('physics-ai-container', {
+        discipline: 'physics',
+        topic: 'กลศาสตร์ & ลูกตุ้มคู่ Chaotic'
+      });
+
+      // Module Switcher
+      const modButtons = document.querySelectorAll('.phys-mod-btn');
+      const simViews = {
+        mechanics: document.getElementById('sim-view-mechanics'),
+        electromagnet: document.getElementById('sim-view-electromagnet'),
+        optics: document.getElementById('sim-view-optics'),
+        thermo: document.getElementById('sim-view-thermo'),
+        quantum: document.getElementById('sim-view-quantum')
+      };
+
+      const titleMap = {
+        mechanics: 'กลศาสตร์ & ลูกตุ้มคู่ Chaotic (Double Pendulum Mechanics)',
+        electromagnet: 'ไฟฟ้าแม่เหล็ก & ฟาราเดย์ (Faraday Induction Coil)',
+        optics: 'คลื่น แสง เลนส์ & เสียง (Optics Bench & Ray Tracing)',
+        thermo: 'อุณหพลศาสตร์ & วัฏจักร Carnot (Carnot Heat Engine)',
+        quantum: 'ฟิสิกส์ควอนตัม & โฟโตอิเล็กทริก (Photoelectric Effect)'
+      };
+
+      modButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mod = btn.getAttribute('data-mod');
+          NexusCore.Sound.click();
+
+          modButtons.forEach(b => {
+            b.className = 'phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-slate-300 hover:bg-slate-800/60';
+          });
+          btn.className = 'phys-mod-btn w-full text-left p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all bg-sky-500/20 text-sky-300 border border-sky-500/40';
+
+          Object.keys(simViews).forEach(k => {
+            if (simViews[k]) simViews[k].classList.add('hidden');
+          });
+          if (simViews[mod]) {
+            simViews[mod].classList.remove('hidden');
+          }
+
+          document.getElementById('active-sim-title').textContent = titleMap[mod];
+          NexusAITutor.setContext('physics', titleMap[mod]);
+
+          if (mod === 'electromagnet') drawFaraday();
+          if (mod === 'optics') drawOpticsBench();
+          if (mod === 'thermo') drawCarnotEngine();
+          if (mod === 'quantum') drawPhotoelectric();
+        });
+      });
+
+      // --- SIMULATION 1: CHAOTIC DOUBLE PENDULUM CANVAS ---
+      const pendCanvas = document.getElementById('pendulum-canvas');
+      let pctx = pendCanvas ? pendCanvas.getContext('2d') : null;
+
+      let r1 = 100, r2 = 100;
+      let m1 = 10, m2 = 10;
+      let a1 = Math.PI / 2, a2 = Math.PI / 2;
+      let a1_v = 0, a2_v = 0;
+      let g = 9.8 * 0.05;
+      let damping = 0.999;
+      let trail = [];
+
+      function animatePendulum() {
+        if (!pctx) return;
+        const w = pendCanvas.width = pendCanvas.parentElement.clientWidth;
+        const h = pendCanvas.height = pendCanvas.parentElement.clientHeight;
+        const cx = w / 2;
+        const cy = h / 3;
+
+        // Double pendulum equations of motion (Lagrangian mechanics)
+        let num1 = -g * (2 * m1 + m2) * Math.sin(a1);
+        let num2 = -m2 * g * Math.sin(a1 - 2 * a2);
+        let num3 = -2 * Math.sin(a1 - a2) * m2 * (a2_v * a2_v * r2 + a1_v * a1_v * r1 * Math.cos(a1 - a2));
+        let den = r1 * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
+        let a1_a = (num1 + num2 + num3) / den;
+
+        let num4 = 2 * Math.sin(a1 - a2) * (a1_v * a1_v * r1 * (m1 + m2) + g * (m1 + m2) * Math.cos(a1) + a2_v * a2_v * r2 * m2 * Math.cos(a1 - a2));
+        let den2 = r2 * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
+        let a2_a = num4 / den2;
+
+        a1_v += a1_a;
+        a2_v += a2_a;
+        a1_v *= damping;
+        a2_v *= damping;
+        a1 += a1_v;
+        a2 += a2_v;
+
+        let x1 = cx + r1 * Math.sin(a1);
+        let y1 = cy + r1 * Math.cos(a1);
+        let x2 = x1 + r2 * Math.sin(a2);
+        let y2 = y1 + r2 * Math.cos(a2);
+
+        trail.push({ x: x2, y: y2 });
+        if (trail.length > 250) trail.shift();
+
+        // Render Background & Trails
+        pctx.fillStyle = '#030712';
+        pctx.fillRect(0, 0, w, h);
+
+        // Draw chaotic trail
+        if (trail.length > 1) {
+          pctx.beginPath();
+          pctx.moveTo(trail[0].x, trail[0].y);
+          for (let i = 1; i < trail.length; i++) {
+            pctx.strokeStyle = `rgba(56, 189, 248, ${i / trail.length})`;
+            pctx.lineWidth = 1.2;
+            pctx.lineTo(trail[i].x, trail[i].y);
+          }
+          pctx.stroke();
+        }
+
+        // Draw Arms
+        pctx.strokeStyle = '#94a3b8';
+        pctx.lineWidth = 2.5;
+        pctx.beginPath();
+        pctx.moveTo(cx, cy);
+        pctx.lineTo(x1, y1);
+        pctx.lineTo(x2, y2);
+        pctx.stroke();
+
+        // Draw bobs
+        pctx.fillStyle = '#06b6d4';
+        pctx.beginPath(); pctx.arc(x1, y1, 8, 0, Math.PI * 2); pctx.fill();
+
+        pctx.fillStyle = '#38bdf8';
+        pctx.beginPath(); pctx.arc(x2, y2, 10, 0, Math.PI * 2); pctx.fill();
+
+        requestAnimationFrame(animatePendulum);
+      }
+      animatePendulum();
+
+      document.getElementById('btn-clear-trail')?.addEventListener('click', () => {
+        trail = [];
+        NexusCore.Sound.click();
+      });
+
+      document.getElementById('btn-kick-pendulum')?.addEventListener('click', () => {
+        a1_v += (Math.random() - 0.5) * 0.3;
+        a2_v += (Math.random() - 0.5) * 0.4;
+        NexusCore.Sound.laser();
+      });
+
+      // --- SIMULATION 2: FARADAY INDUCTION CANVAS ---
+      const faradayCanvas = document.getElementById('faraday-canvas');
+      let fctx = faradayCanvas ? faradayCanvas.getContext('2d') : null;
+      let magnetPos = 30; // 0 to 100
+      let lastMagnetPos = 30;
+
+      function drawFaraday() {
+        if (!fctx) return;
+        const w = faradayCanvas.width = faradayCanvas.parentElement.clientWidth;
+        const h = faradayCanvas.height = faradayCanvas.parentElement.clientHeight;
+
+        fctx.clearRect(0, 0, w, h);
+
+        // Solenoid Coil in center
+        const coilX = w / 2 - 50;
+        const coilY = h / 2 - 40;
+        fctx.strokeStyle = '#f59e0b';
+        fctx.lineWidth = 4;
+        for (let i = 0; i < 8; i++) {
+          fctx.beginPath();
+          fctx.ellipse(coilX + i * 14, h / 2, 8, 35, 0, 0, Math.PI * 2);
+          fctx.stroke();
+        }
+
+        // Magnet position
+        const magX = (magnetPos / 100) * (w - 180) + 20;
+        const magY = h / 2 - 18;
+
+        // North pole (Red)
+        fctx.fillStyle = '#ef4444';
+        fctx.fillRect(magX, magY, 40, 36);
+        fctx.fillStyle = '#fff';
+        fctx.font = 'bold 12px monospace';
+        fctx.fillText('N', magX + 14, magY + 23);
+
+        // South pole (Blue)
+        fctx.fillStyle = '#3b82f6';
+        fctx.fillRect(magX + 40, magY, 40, 36);
+        fctx.fillStyle = '#fff';
+        fctx.fillText('S', magX + 54, magY + 23);
+
+        // Calculate induced EMF from velocity
+        const deltaX = magnetPos - lastMagnetPos;
+        lastMagnetPos = magnetPos;
+        const emf = -deltaX * 0.45; // Faraday's Law: EMF = -dPhi/dt
+        document.getElementById('emf-voltage-label').textContent = `${emf.toFixed(2)} V`;
+      }
+
+      document.getElementById('magnet-pos-slider')?.addEventListener('input', (e) => {
+        magnetPos = parseInt(e.target.value, 10);
+        drawFaraday();
+      });
+
+      // --- SIMULATION 3: OPTICS BENCH CANVAS ---
+      const opticsCanvas = document.getElementById('optics-canvas');
+      let octx = opticsCanvas ? opticsCanvas.getContext('2d') : null;
+      let lensType = 'convex';
+      let focalLength = 80;
+      let objDist = 160;
+
+      function drawOpticsBench() {
+        if (!octx) return;
+        const w = opticsCanvas.width = opticsCanvas.parentElement.clientWidth;
+        const h = opticsCanvas.height = opticsCanvas.parentElement.clientHeight;
+        const cy = h / 2;
+        const cx = w / 2;
+
+        octx.clearRect(0, 0, w, h);
+
+        // Optical Principal Axis
+        octx.strokeStyle = '#475569';
+        octx.lineWidth = 1;
+        octx.beginPath();
+        octx.moveTo(0, cy);
+        octx.lineTo(w, cy);
+        octx.stroke();
+
+        // Lens in center
+        octx.strokeStyle = '#38bdf8';
+        octx.lineWidth = 3;
+        octx.beginPath();
+        if (lensType === 'convex') {
+          octx.ellipse(cx, cy, 10, 70, 0, 0, Math.PI * 2);
+        } else {
+          octx.moveTo(cx - 8, cy - 70); octx.lineTo(cx + 8, cy - 70);
+          octx.lineTo(cx, cy); octx.lineTo(cx + 8, cy + 70); octx.lineTo(cx - 8, cy + 70);
+        }
+        octx.stroke();
+
+        // Focal Points F and 2F
+        octx.fillStyle = '#f59e0b';
+        octx.beginPath(); octx.arc(cx - focalLength, cy, 3, 0, Math.PI * 2); octx.fill();
+        octx.beginPath(); octx.arc(cx + focalLength, cy, 3, 0, Math.PI * 2); octx.fill();
+        octx.fillStyle = '#94a3b8';
+        octx.font = '10px sans-serif';
+        octx.fillText('F', cx - focalLength - 4, cy + 15);
+        octx.fillText("F'", cx + focalLength - 4, cy + 15);
+
+        // Object (Green arrow pointing up)
+        const objX = cx - objDist;
+        const objH = 40;
+        octx.strokeStyle = '#10b981';
+        octx.lineWidth = 2.5;
+        octx.beginPath();
+        octx.moveTo(objX, cy);
+        octx.lineTo(objX, cy - objH);
+        octx.lineTo(objX - 4, cy - objH + 8);
+        octx.moveTo(objX, cy - objH);
+        octx.lineTo(objX + 4, cy - objH + 8);
+        octx.stroke();
+
+        // Ray 1: Parallel to axis, then through focal point
+        octx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+        octx.lineWidth = 1.2;
+        octx.beginPath();
+        octx.moveTo(objX, cy - objH);
+        octx.lineTo(cx, cy - objH);
+        octx.lineTo(cx + focalLength * 2, cy + objH);
+        octx.stroke();
+
+        // Ray 2: Through lens optical center
+        octx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+        octx.beginPath();
+        octx.moveTo(objX, cy - objH);
+        octx.lineTo(cx + objDist, cy + objH);
+        octx.stroke();
+      }
+
+      document.getElementById('lens-type-select')?.addEventListener('change', (e) => {
+        lensType = e.target.value;
+        drawOpticsBench();
+      });
+
+      document.getElementById('focal-len-slider')?.addEventListener('input', (e) => {
+        focalLength = parseInt(e.target.value, 10);
+        document.getElementById('focal-len-label').textContent = `${focalLength} mm`;
+        drawOpticsBench();
+      });
+
+      document.getElementById('obj-dist-slider')?.addEventListener('input', (e) => {
+        objDist = parseInt(e.target.value, 10);
+        document.getElementById('obj-dist-label').textContent = `${objDist} mm`;
+        drawOpticsBench();
+      });
+
+      // --- SIMULATION 4: THERMODYNAMICS CARNOT CYCLE ---
+      const carnotCanvas = document.getElementById('carnot-canvas');
+      let cctx = carnotCanvas ? carnotCanvas.getContext('2d') : null;
+
+      function drawCarnotEngine() {
+        if (!cctx) return;
+        const w = carnotCanvas.width = carnotCanvas.parentElement.clientWidth;
+        const h = carnotCanvas.height = carnotCanvas.parentElement.clientHeight;
+
+        cctx.clearRect(0, 0, w, h);
+
+        // Draw Carnot P-V diagram
+        cctx.strokeStyle = '#94a3b8';
+        cctx.lineWidth = 1.5;
+        // Axes
+        cctx.beginPath();
+        cctx.moveTo(30, 20); cctx.lineTo(30, h - 30); cctx.lineTo(w - 20, h - 30);
+        cctx.stroke();
+
+        // Curve loop
+        cctx.strokeStyle = '#06b6d4';
+        cctx.lineWidth = 2.5;
+        cctx.beginPath();
+        cctx.moveTo(60, 40);
+        cctx.quadraticCurveTo(120, 50, 180, 80); // Isothermal expansion
+        cctx.quadraticCurveTo(200, 120, 210, 150); // Adiabatic expansion
+        cctx.quadraticCurveTo(140, 140, 90, 120); // Isothermal compression
+        cctx.quadraticCurveTo(70, 70, 60, 40); // Adiabatic compression
+        cctx.stroke();
+
+        cctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
+        cctx.fill();
+
+        cctx.fillStyle = '#cbd5e1';
+        cctx.font = '10px monospace';
+        cctx.fillText('P (Pressure)', 10, 15);
+        cctx.fillText('V (Volume)', w - 60, h - 15);
+        cctx.fillText('W_net Work Done', 100, 95);
+      }
+
+      function updateCarnot() {
+        const th = parseInt(document.getElementById('th-slider').value, 10);
+        const tc = parseInt(document.getElementById('tc-slider').value, 10);
+        document.getElementById('th-val-label').textContent = `${th} K`;
+        document.getElementById('tc-val-label').textContent = `${tc} K`;
+        const eff = (1 - tc / th) * 100;
+        document.getElementById('carnot-eff-val').textContent = `${eff.toFixed(1)}%`;
+      }
+
+      document.getElementById('th-slider')?.addEventListener('input', updateCarnot);
+      document.getElementById('tc-slider')?.addEventListener('input', updateCarnot);
+
+      // --- SIMULATION 5: QUANTUM PHOTOELECTRIC EFFECT ---
+      const photoCanvas = document.getElementById('photoelectric-canvas');
+      let phctx = photoCanvas ? photoCanvas.getContext('2d') : null;
+
+      function drawPhotoelectric() {
+        if (!phctx) return;
+        const w = photoCanvas.width = photoCanvas.parentElement.clientWidth;
+        const h = photoCanvas.height = photoCanvas.parentElement.clientHeight;
+
+        phctx.clearRect(0, 0, w, h);
+
+        const wave = parseInt(document.getElementById('photo-wave-slider').value, 10);
+        const workFn = parseFloat(document.getElementById('metal-work-select').value);
+
+        // Photon Energy E = hc / lambda (hc approx 1240 eV*nm)
+        const photonE = 1240 / wave;
+        const ekMax = Math.max(0, photonE - workFn);
+
+        document.getElementById('photo-ek-label').textContent = `${ekMax.toFixed(2)} eV`;
+        const statusEl = document.getElementById('photo-status-msg');
+        if (ekMax > 0) {
+          statusEl.className = 'text-[10px] text-emerald-400 font-bold';
+          statusEl.textContent = '● เกิดโฟโตอิเล็กตรอนหลุด (Photoelectrons Emitted)';
+        } else {
+          statusEl.className = 'text-[10px] text-rose-400 font-bold';
+          statusEl.textContent = '● ไม่เกิดปรากฏการณ์ (E_photon < Work Function)';
+        }
+
+        // Metal Plate on left
+        phctx.fillStyle = '#64748b';
+        phctx.fillRect(40, 30, 20, h - 60);
+
+        // Collector Plate on right
+        phctx.fillStyle = '#475569';
+        phctx.fillRect(w - 60, 30, 20, h - 60);
+
+        // Incoming Light Beam
+        phctx.strokeStyle = wave < 400 ? '#c084fc' : wave < 500 ? '#38bdf8' : wave < 600 ? '#4ade80' : '#f87171';
+        phctx.lineWidth = 3;
+        phctx.beginPath();
+        phctx.moveTo(0, 50);
+        phctx.lineTo(40, 70);
+        phctx.stroke();
+
+        // Emitted electrons flying to collector
+        if (ekMax > 0) {
+          phctx.fillStyle = '#38bdf8';
+          for (let i = 0; i < 8; i++) {
+            const ex = 65 + i * 25 + (Date.now() * 0.05 * Math.sqrt(ekMax)) % (w - 130);
+            const ey = 50 + (i % 4) * 25;
+            phctx.beginPath();
+            phctx.arc(ex, ey, 3.5, 0, Math.PI * 2);
+            phctx.fill();
+          }
+        }
+      }
+
+      document.getElementById('photo-wave-slider')?.addEventListener('input', (e) => {
+        const val = e.target.value;
+        document.getElementById('photo-wave-label').textContent = `${val} nm (${val < 400 ? 'UV' : val > 700 ? 'Infrared' : 'Visible Light'})`;
+        drawPhotoelectric();
+      });
+
+      document.getElementById('metal-work-select')?.addEventListener('change', drawPhotoelectric);
+
+      // Custom Physics Lab Designer
+      const customModal = document.getElementById('custom-lab-workbench-modal');
+      const customToggle = document.getElementById('btn-custom-lab-toggle');
+      const customClose = document.getElementById('btn-close-custom-lab');
+      const customPhysBenchDisplay = document.getElementById('custom-phys-bench-display');
+
+      let savedPhysLab = NexusCore.getCustomLab('physics') || {
+        name: 'สถานีทดสอบควอนตัมและเลเซอร์ (Quantum Optics Bay)',
+        colorTheme: '#06b6d4',
+        equipment: ['Laser Diode 532nm', 'Digital Oscilloscope 100MHz', 'Precision Optical Rail', 'Hall Effect Gaussmeter']
+      };
+
+      function renderCustomPhysSlots() {
+        if (!customPhysBenchDisplay) return;
+        customPhysBenchDisplay.innerHTML = savedPhysLab.equipment.map((item, idx) => `
+          <div class="lab-bench-slot p-3 bg-slate-900/60 rounded-xl border border-sky-500/30 flex flex-col items-center justify-between text-center relative group">
+            <span class="text-[10px] text-slate-500 font-mono">สล็อต #${idx + 1}</span>
+            <div class="my-1.5 font-bold text-white text-xs">${item}</div>
+            <button class="btn-remove-phys-slot text-rose-400 hover:text-rose-300 text-[10px]" data-idx="${idx}">
+              <i class="fas fa-trash-alt mr-1"></i> ลบออก
+            </button>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.btn-remove-phys-slot').forEach(b => {
+          b.addEventListener('click', () => {
+            const idx = parseInt(b.getAttribute('data-idx'), 10);
+            savedPhysLab.equipment.splice(idx, 1);
+            renderCustomPhysSlots();
+            NexusCore.Sound.click();
+          });
+        });
+      }
+
+      customToggle?.addEventListener('click', () => {
+        customModal.classList.remove('hidden');
+        renderCustomPhysSlots();
+        NexusCore.Sound.click();
+      });
+
+      customClose?.addEventListener('click', () => {
+        customModal.classList.add('hidden');
+        NexusCore.Sound.click();
+      });
+
+      document.querySelectorAll('.btn-add-phys-equip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.getAttribute('data-item');
+          if (savedPhysLab.equipment.length >= 8) {
+            NexusCore.toast('โต๊ะแล็บฟิสิกส์เต็มแล้ว', 'warning');
+            return;
+          }
+          savedPhysLab.equipment.push(item);
+          renderCustomPhysSlots();
+          NexusCore.Sound.laser();
+        });
+      });
+
+      document.getElementById('btn-save-custom-phys-lab')?.addEventListener('click', () => {
+        savedPhysLab.name = document.getElementById('custom-lab-name-input').value.trim() || 'My Custom Physics Lab';
+        NexusCore.saveCustomLab('physics', savedPhysLab);
+        customModal.classList.add('hidden');
+      });
+
+      // CSV Export
+      document.getElementById('btn-export-phys-csv')?.addEventListener('click', () => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+          + "Parameter,Value,Unit\n"
+          + "Gravity,9.8,m/s2\n"
+          + "Lens_Focal_Length,80,mm\n"
+          + "Carnot_Efficiency,50.0,%\n"
+          + "Photoelectric_Ek_Max,1.26,eV\n";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "nexuslab_physics_telemetry.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        NexusCore.toast('ส่งออกข้อมูลวิเคราะห์ฟิสิกส์สำเร็จ', 'success');
+      });
+    });
+  </script>
+</body>
+</html>
