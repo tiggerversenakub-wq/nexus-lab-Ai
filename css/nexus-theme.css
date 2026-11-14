@@ -1,0 +1,385 @@
+/* ==========================================================================
+   NexusLab AI - Futuristic Glassmorphism & Workstation Stylesheet
+   Supports: Dark/Light Mode, Tri-Panel Architecture, Tablet & Mobile Views
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --font-sans: 'Outfit', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Futuristic Sci-Fi Palette - Dark Default */
+  --bg-primary: #070913;
+  --bg-secondary: #0d1224;
+  --bg-tertiary: #141b36;
+  --surface-glass: rgba(13, 18, 36, 0.72);
+  --surface-glass-card: rgba(20, 27, 54, 0.65);
+  --surface-glass-border: rgba(120, 160, 255, 0.15);
+  --surface-glass-hover: rgba(30, 41, 79, 0.85);
+
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --accent-cyan: #06b6d4;
+  --accent-cyan-glow: rgba(6, 182, 212, 0.35);
+  --accent-emerald: #10b981;
+  --accent-emerald-glow: rgba(16, 185, 129, 0.35);
+  --accent-purple: #8b5cf6;
+  --accent-purple-glow: rgba(139, 92, 246, 0.35);
+  --accent-rose: #f43f5e;
+  --accent-amber: #f59e0b;
+  --accent-blue: #3b82f6;
+
+  --grid-line: rgba(56, 189, 248, 0.05);
+  --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --neon-border-glow: 0 0 15px rgba(6, 182, 212, 0.3);
+}
+
+html.light {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-tertiary: #e2e8f0;
+  --surface-glass: rgba(255, 255, 255, 0.82);
+  --surface-glass-card: rgba(255, 255, 255, 0.75);
+  --surface-glass-border: rgba(99, 102, 241, 0.18);
+  --surface-glass-hover: rgba(241, 245, 249, 0.95);
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+
+  --accent-cyan: #0284c7;
+  --accent-cyan-glow: rgba(2, 132, 199, 0.2);
+  --accent-emerald: #059669;
+  --accent-emerald-glow: rgba(5, 150, 105, 0.2);
+  --accent-purple: #7c3aed;
+  --accent-purple-glow: rgba(124, 58, 237, 0.2);
+
+  --grid-line: rgba(99, 102, 241, 0.06);
+  --panel-shadow: 0 8px 24px 0 rgba(100, 116, 139, 0.12);
+  --neon-border-glow: 0 0 15px rgba(2, 132, 199, 0.2);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--surface-glass-border);
+  box-shadow: var(--panel-shadow);
+}
+
+.glass-card {
+  background: var(--surface-glass-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-glass-border);
+  box-shadow: var(--panel-shadow);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: var(--surface-glass-hover);
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 10px 30px -5px rgba(6, 182, 212, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-header {
+  background: rgba(7, 9, 19, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--surface-glass-border);
+}
+
+html.light .glass-header {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+/* Futuristic Neon Accents */
+.neon-glow-cyan {
+  box-shadow: 0 0 20px var(--accent-cyan-glow);
+}
+.neon-glow-purple {
+  box-shadow: 0 0 20px var(--accent-purple-glow);
+}
+.neon-glow-emerald {
+  box-shadow: 0 0 20px var(--accent-emerald-glow);
+}
+.neon-text-cyan {
+  text-shadow: 0 0 10px var(--accent-cyan-glow);
+}
+.neon-text-purple {
+  text-shadow: 0 0 10px var(--accent-purple-glow);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+/* Workstation Tri-Panel Layout (Desktop) */
+.tri-panel-container {
+  display: grid;
+  grid-template-columns: 320px 1fr 380px;
+  gap: 1rem;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+  padding: 1rem;
+}
+
+@media (max-width: 1280px) {
+  .tri-panel-container {
+    grid-template-columns: 280px 1fr 340px;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+}
+
+/* Tablet (iPad) Responsive: Collapsible Drawer / Split Screen */
+@media (max-width: 1024px) {
+  .tri-panel-container {
+    grid-template-columns: 280px 1fr;
+    height: auto;
+    min-height: calc(100vh - 64px);
+    overflow: visible;
+  }
+  .tri-panel-right {
+    position: fixed;
+    right: 0;
+    top: 64px;
+    bottom: 0;
+    width: 360px;
+    z-index: 40;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tri-panel-right.drawer-open {
+    transform: translateX(0);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Mobile Responsive: Stacked / Tab-based + Bottom Navigation */
+@media (max-width: 768px) {
+  .tri-panel-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    margin-bottom: 72px; /* Space for bottom nav */
+    height: auto;
+  }
+  .tri-panel-left,
+  .tri-panel-center,
+  .tri-panel-right {
+    width: 100% !important;
+  }
+  .tri-panel-right {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    display: none; /* Controlled by mobile tabs */
+  }
+  .tri-panel-right.mobile-active {
+    display: block;
+  }
+}
+
+/* Bottom Navigation Bar for Mobile */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--surface-glass-border);
+  z-index: 50;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+}
+
+.mobile-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+.mobile-nav-btn.active {
+  color: var(--accent-cyan);
+}
+.mobile-nav-btn i {
+  font-size: 1.25rem;
+  margin-bottom: 2px;
+}
+
+/* Canvas & Simulation Workbench Viewport */
+.sim-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+  border: 1px solid var(--surface-glass-border);
+}
+
+html.light .sim-viewport {
+  background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+}
+
+.sim-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Custom Lab Designer Drag & Drop Area */
+.lab-bench-slot {
+  border: 2px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 0.75rem;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.lab-bench-slot:hover,
+.lab-bench-slot.drag-over {
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.08);
+}
+
+/* Equipment badge */
+.equipment-pill {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.equipment-pill:active {
+  cursor: grabbing;
+}
+
+/* Audio Wave Animation for Voice */
+@keyframes soundwave {
+  0%, 100% { height: 6px; }
+  50% { height: 24px; }
+}
+.wave-bar {
+  width: 3px;
+  background: var(--accent-cyan);
+  border-radius: 9999px;
+  animation: soundwave 1s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.wave-bar:nth-child(5) { animation-delay: 0.6s; }
+
+/* Pulse animation */
+@keyframes cyber-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.04); opacity: 1; filter: drop-shadow(0 0 12px var(--accent-cyan)); }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+.cyber-pulse {
+  animation: cyber-pulse 3s infinite ease-in-out;
+}
+
+/* Badge tags */
+.discipline-badge-bio {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.discipline-badge-chem {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+.discipline-badge-phys {
+  background: rgba(6, 182, 212, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+.discipline-badge-astro {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* Toast Notifications */
+#nexus-toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.nexus-toast {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 420px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--surface-glass-border);
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+html.light .nexus-toast {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
